@@ -26,7 +26,7 @@ Next, paste this code into a `main.tf` file:
 terraform {
   required_providers {
     cloudtamerio = {
-      version = ">= 0.1"
+      version = ">= 0.1.0"
       source  = "github.com/cloudtamer-io/terraform-provider-cloudtamerio"
     }
   }
