@@ -12,15 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceOuCloudAccessRole() *schema.Resource {
+func resourceOUCloudAccessRole() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceOuCloudAccessRoleCreate,
-		ReadContext:   resourceOuCloudAccessRoleRead,
-		UpdateContext: resourceOuCloudAccessRoleUpdate,
-		DeleteContext: resourceOuCloudAccessRoleDelete,
+		CreateContext: resourceOUCloudAccessRoleCreate,
+		ReadContext:   resourceOUCloudAccessRoleRead,
+		UpdateContext: resourceOUCloudAccessRoleUpdate,
+		DeleteContext: resourceOUCloudAccessRoleDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				resourceOuCloudAccessRoleRead(ctx, d, m)
+				resourceOUCloudAccessRoleRead(ctx, d, m)
 				return []*schema.ResourceData{d}, nil
 			},
 		},
@@ -126,7 +126,7 @@ func resourceOuCloudAccessRole() *schema.Resource {
 	}
 }
 
-func resourceOuCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 
@@ -135,7 +135,7 @@ func resourceOuCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData
 		AwsIamRoleName:      d.Get("aws_iam_role_name").(string),
 		LongTermAccessKeys:  d.Get("long_term_access_keys").(bool),
 		Name:                d.Get("name").(string),
-		OuID:                d.Get("ou_id").(int),
+		OUID:                d.Get("ou_id").(int),
 		ShortTermAccessKeys: d.Get("short_term_access_keys").(bool),
 		WebAccess:           d.Get("web_access").(bool),
 	}
@@ -144,14 +144,14 @@ func resourceOuCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to create OuCloudAccessRole",
+			Summary:  "Unable to create OUCloudAccessRole",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), post),
 		})
 		return diags
 	} else if resp.RecordID == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to create OuCloudAccessRole",
+			Summary:  "Unable to create OUCloudAccessRole",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", errors.New("received item ID of 0"), post),
 		})
 		return diags
@@ -159,12 +159,12 @@ func resourceOuCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(strconv.Itoa(resp.RecordID))
 
-	resourceOuCloudAccessRoleRead(ctx, d, m)
+	resourceOUCloudAccessRoleRead(ctx, d, m)
 
 	return diags
 }
 
-func resourceOuCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -174,7 +174,7 @@ func resourceOuCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to read OuCloudAccessRole",
+			Summary:  "Unable to read OUCloudAccessRole",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 		})
 		return diags
@@ -182,34 +182,34 @@ func resourceOuCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, 
 	item := resp.Data
 
 	data := make(map[string]interface{})
-	data["aws_iam_path"] = item.OuCloudAccessRole.AwsIamPath
+	data["aws_iam_path"] = item.OUCloudAccessRole.AwsIamPath
 	if hc.InflateSingleObjectWithID(item.AwsIamPermissionsBoundary) != nil {
 		data["aws_iam_permissions_boundary"] = hc.InflateSingleObjectWithID(item.AwsIamPermissionsBoundary)
 	}
 	if hc.InflateObjectWithID(item.AwsIamPolicies) != nil {
 		data["aws_iam_policies"] = hc.InflateObjectWithID(item.AwsIamPolicies)
 	}
-	data["aws_iam_role_name"] = item.OuCloudAccessRole.AwsIamRoleName
-	data["description"] = item.Ou.Description
+	data["aws_iam_role_name"] = item.OUCloudAccessRole.AwsIamRoleName
+	data["description"] = item.OU.Description
 	data["inherited_aws_iam_policies"] = hc.InflateObjectWithID(item.InheritedAwsIamPolicies)
-	data["long_term_access_keys"] = item.OuCloudAccessRole.LongTermAccessKeys
-	data["name"] = item.OuCloudAccessRole.Name
-	data["ou_id"] = item.OuCloudAccessRole.OuID
-	data["parent_ou_id"] = item.Ou.ParentOuID
-	data["short_term_access_keys"] = item.OuCloudAccessRole.ShortTermAccessKeys
+	data["long_term_access_keys"] = item.OUCloudAccessRole.LongTermAccessKeys
+	data["name"] = item.OUCloudAccessRole.Name
+	data["ou_id"] = item.OUCloudAccessRole.OUID
+	data["parent_ou_id"] = item.OU.ParentOuID
+	data["short_term_access_keys"] = item.OUCloudAccessRole.ShortTermAccessKeys
 	if hc.InflateObjectWithID(item.UserGroups) != nil {
 		data["user_groups"] = hc.InflateObjectWithID(item.UserGroups)
 	}
 	if hc.InflateObjectWithID(item.Users) != nil {
 		data["users"] = hc.InflateObjectWithID(item.Users)
 	}
-	data["web_access"] = item.OuCloudAccessRole.WebAccess
+	data["web_access"] = item.OUCloudAccessRole.WebAccess
 
 	for k, v := range data {
 		if err := d.Set(k, v); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to read and set OuCloudAccessRole",
+				Summary:  "Unable to read and set OUCloudAccessRole",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
@@ -219,7 +219,7 @@ func resourceOuCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -246,7 +246,7 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to update OuCloudAccessRole",
+				Summary:  "Unable to update OUCloudAccessRole",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
@@ -271,7 +271,7 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 			len(arrAddAzureRoleDefinitions) > 0 ||
 			len(arrAddUserGroupIds) > 0 ||
 			len(arrAddUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OuCloudAccessRoleAssociationsAdd{
+			_, err = c.POST(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsAdd{
 				AwsIamPermissionsBoundary: arrAddAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrAddAwsIamPolicies,
 				AzureRoleDefinitions:      &arrAddAzureRoleDefinitions,
@@ -281,7 +281,7 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 			if err != nil {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
-					Summary:  "Unable to add owners on OuCloudAccessRole",
+					Summary:  "Unable to add owners on OUCloudAccessRole",
 					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 				})
 				return diags
@@ -293,7 +293,7 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 			len(arrRemoveAzureRoleDefinitions) > 0 ||
 			len(arrRemoveUserGroupIds) > 0 ||
 			len(arrRemoveUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OuCloudAccessRoleAssociationsRemove{
+			err = c.DELETE(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsRemove{
 				AwsIamPermissionsBoundary: arrRemoveAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrRemoveAwsIamPolicies,
 				AzureRoleDefinitions:      &arrRemoveAzureRoleDefinitions,
@@ -303,7 +303,7 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 			if err != nil {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
-					Summary:  "Unable to remove owners on OuCloudAccessRole",
+					Summary:  "Unable to remove owners on OUCloudAccessRole",
 					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 				})
 				return diags
@@ -315,10 +315,10 @@ func resourceOuCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
-	return resourceOuCloudAccessRoleRead(ctx, d, m)
+	return resourceOUCloudAccessRoleRead(ctx, d, m)
 }
 
-func resourceOuCloudAccessRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUCloudAccessRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -327,7 +327,7 @@ func resourceOuCloudAccessRoleDelete(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to delete OuCloudAccessRole",
+			Summary:  "Unable to delete OUCloudAccessRole",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 		})
 		return diags

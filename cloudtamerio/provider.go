@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_cloud_rule":                  resourceCloudRule(),
 			"cloudtamerio_compliance_check":            resourceComplianceCheck(),
 			"cloudtamerio_compliance_standard":         resourceComplianceStandard(),
+			"cloudtamerio_ou_cloud_access_role":        resourceOUCloudAccessRole(),
 			"cloudtamerio_project_cloud_access_role":   resourceProjectCloudAccessRole(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{

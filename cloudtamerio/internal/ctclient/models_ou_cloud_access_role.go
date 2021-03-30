@@ -56,7 +56,7 @@ type OUCloudAccessRoleUpdate struct {
 type OUCloudAccessRoleAssociationsAdd struct {
 	AwsIamPermissionsBoundary *int   `json:"aws_iam_permissions_boundary"`
 	AwsIamPolicies            *[]int `json:"aws_iam_policies"`
-	AzureRoleDefinitions      []int  `json:"azure_role_definitions"`
+	AzureRoleDefinitions      *[]int `json:"azure_role_definitions"`
 	UserGroupIds              *[]int `json:"user_group_ids"`
 	UserIds                   *[]int `json:"user_ids"`
 }
@@ -65,7 +65,7 @@ type OUCloudAccessRoleAssociationsAdd struct {
 type OUCloudAccessRoleAssociationsRemove struct {
 	AwsIamPermissionsBoundary *int   `json:"aws_iam_permissions_boundary"`
 	AwsIamPolicies            *[]int `json:"aws_iam_policies"`
-	AzureRoleDefinitions      []int  `json:"azure_role_definitions"`
+	AzureRoleDefinitions      *[]int `json:"azure_role_definitions"`
 	UserGroupIds              *[]int `json:"user_group_ids"`
 	UserIds                   *[]int `json:"user_ids"`
 }
