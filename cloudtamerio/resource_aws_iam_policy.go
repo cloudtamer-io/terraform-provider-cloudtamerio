@@ -18,6 +18,12 @@ func resourceAwsIamPolicy() *schema.Resource {
 		ReadContext:   resourceAwsIamPolicyRead,
 		UpdateContext: resourceAwsIamPolicyUpdate,
 		DeleteContext: resourceAwsIamPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				resourceAwsIamPolicyRead(ctx, d, m)
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			// Notice there is no 'id' field specified because it will be created.
 			"last_updated": {

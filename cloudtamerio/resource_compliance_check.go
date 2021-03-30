@@ -18,6 +18,12 @@ func resourceComplianceCheck() *schema.Resource {
 		ReadContext:   resourceComplianceCheckRead,
 		UpdateContext: resourceComplianceCheckUpdate,
 		DeleteContext: resourceComplianceCheckDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				resourceComplianceCheckRead(ctx, d, m)
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			// Notice there is no 'id' field specified because it will be created.
 			"last_updated": {
