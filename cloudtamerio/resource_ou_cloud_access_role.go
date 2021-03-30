@@ -256,25 +256,21 @@ func resourceOUCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 	// Handle associations.
 	if d.HasChanges("aws_iam_permissions_boundary",
 		"aws_iam_policies",
-		"azure_role_definitions",
 		"user_groups",
 		"users") {
 		hasChanged++
 		arrAddAwsIamPermissionsBoundary, arrRemoveAwsIamPermissionsBoundary, _, err := hc.AssociationChangedInt(d, "aws_iam_permissions_boundary")
 		arrAddAwsIamPolicies, arrRemoveAwsIamPolicies, _, err := hc.AssociationChanged(d, "aws_iam_policies")
-		arrAddAzureRoleDefinitions, arrRemoveAzureRoleDefinitions, _, err := hc.AssociationChanged(d, "azure_role_definitions")
 		arrAddUserGroupIds, arrRemoveUserGroupIds, _, err := hc.AssociationChanged(d, "user_groups")
 		arrAddUserIds, arrRemoveUserIds, _, err := hc.AssociationChanged(d, "users")
 
 		if arrAddAwsIamPermissionsBoundary != nil ||
 			len(arrAddAwsIamPolicies) > 0 ||
-			len(arrAddAzureRoleDefinitions) > 0 ||
 			len(arrAddUserGroupIds) > 0 ||
 			len(arrAddUserIds) > 0 {
 			_, err = c.POST(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsAdd{
 				AwsIamPermissionsBoundary: arrAddAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrAddAwsIamPolicies,
-				AzureRoleDefinitions:      &arrAddAzureRoleDefinitions,
 				UserGroupIds:              &arrAddUserGroupIds,
 				UserIds:                   &arrAddUserIds,
 			})
@@ -290,13 +286,11 @@ func resourceOUCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 
 		if arrRemoveAwsIamPermissionsBoundary != nil ||
 			len(arrRemoveAwsIamPolicies) > 0 ||
-			len(arrRemoveAzureRoleDefinitions) > 0 ||
 			len(arrRemoveUserGroupIds) > 0 ||
 			len(arrRemoveUserIds) > 0 {
 			err = c.DELETE(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsRemove{
 				AwsIamPermissionsBoundary: arrRemoveAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrRemoveAwsIamPolicies,
-				AzureRoleDefinitions:      &arrRemoveAzureRoleDefinitions,
 				UserGroupIds:              &arrRemoveUserGroupIds,
 				UserIds:                   &arrRemoveUserIds,
 			})
