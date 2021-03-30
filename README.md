@@ -4,6 +4,7 @@ The Terraform provider for cloudtamer.io allows you interact with the cloudtamer
 
 - [terraform-provider-cloudtamerio](#terraform-provider-cloudtamerio)
   - [Getting Started](#getting-started)
+    - [Importing Resource State](#importing-resource-state)
   - [Sample Commands](#sample-commands)
     - [Resources](#resources)
     - [Data Sources](#data-sources)
@@ -79,6 +80,23 @@ terraform apply --auto-approve
 ```
 
 You can now make changes to the `main.tf` file and then re-run the `apply` command to push the changes to cloudtamer.io.
+
+### Importing Resource State
+
+This provider does support [importing state for resources](https://www.terraform.io/docs/cli/import/index.html). You will need to create the Terraform files and then you can run commands like this to generate the `terraform.tfstate` so you don't have to delete all your resources and then recreate them to work with Terraform:
+
+```bash
+# Initialize the project.
+terraform init
+
+# Import the resource from your environment - this assumes you have a module called
+# 'aws-cloudformation-template' and you are importing into a resource you defined as 'AuditLogging'.
+# The '20' at the end is the ID of the resource in cloudtamer.io.
+terraform import module.aws-cloudformation-template.cloudtamerio_aws_cloudformation_template.AuditLogging 20
+
+# Verify the state is correct - there shouldn't be any changes listed.
+terraform plan
+```
 
 ## Sample Commands
 
