@@ -82,9 +82,7 @@ func FlattenIntArrayPointer(d *schema.ResourceData, key string) *[]int {
 	if i, ok := d.GetOk(key); ok {
 		v := i.([]int)
 		arr := make([]int, 0)
-		for _, item := range v {
-			arr = append(arr, item)
-		}
+		arr = append(arr, v...)
 		return &arr
 	}
 
