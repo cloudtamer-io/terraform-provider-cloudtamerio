@@ -6,19 +6,19 @@ type OUCloudAccessRoleResponse struct {
 		AwsIamPermissionsBoundary *ObjectWithID  `json:"aws_iam_permissions_boundary"`
 		AwsIamPolicies            []ObjectWithID `json:"aws_iam_policies"`
 		InheritedAwsIamPolicies   []ObjectWithID `json:"inherited_aws_iam_policies"`
-		Ou                        struct {
+		OU                        struct {
 			Description string `json:"description"`
 			ID          int    `json:"id"`
 			Name        string `json:"name"`
 			ParentOuID  int    `json:"parent_ou_id"`
 		} `json:"ou"`
-		OuCloudAccessRole struct {
+		OUCloudAccessRole struct {
 			AwsIamPath          string `json:"aws_iam_path"`
 			AwsIamRoleName      string `json:"aws_iam_role_name"`
 			ID                  int    `json:"id"`
 			LongTermAccessKeys  bool   `json:"long_term_access_keys"`
 			Name                string `json:"name"`
-			OuID                int    `json:"ou_id"`
+			OUID                int    `json:"ou_id"`
 			ShortTermAccessKeys bool   `json:"short_term_access_keys"`
 			WebAccess           bool   `json:"web_access"`
 		} `json:"ou_cloud_access_role"`
@@ -37,7 +37,7 @@ type OUCloudAccessRoleCreate struct {
 	AzureRoleDefinitions      []int  `json:"azure_role_definitions"`
 	LongTermAccessKeys        bool   `json:"long_term_access_keys"`
 	Name                      string `json:"name"`
-	OuID                      int    `json:"ou_id"`
+	OUID                      int    `json:"ou_id"`
 	ShortTermAccessKeys       bool   `json:"short_term_access_keys"`
 	UserGroupIds              *[]int `json:"user_group_ids"`
 	UserIds                   *[]int `json:"user_ids"`

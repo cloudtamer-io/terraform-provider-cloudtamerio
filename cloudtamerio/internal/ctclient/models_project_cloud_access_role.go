@@ -15,7 +15,7 @@ type ProjectCloudAccessRoleResponse struct {
 			Description string `json:"description"`
 			ID          int    `json:"id"`
 			Name        string `json:"name"`
-			OuID        int    `json:"ou_id"`
+			OUID        int    `json:"ou_id"`
 		} `json:"project"`
 		ProjectCloudAccessRole struct {
 			ApplyToAllAccounts  bool   `json:"apply_to_all_accounts"`

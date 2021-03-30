@@ -233,7 +233,7 @@ func resourceProjectCloudAccessRoleRead(ctx context.Context, d *schema.ResourceD
 	data["future_accounts"] = item.ProjectCloudAccessRole.FutureAccounts
 	data["long_term_access_keys"] = item.ProjectCloudAccessRole.LongTermAccessKeys
 	data["name"] = item.ProjectCloudAccessRole.Name
-	data["ou_id"] = item.Project.OuID
+	data["ou_id"] = item.Project.OUID
 	data["project_id"] = item.ProjectCloudAccessRole.ProjectID
 	data["short_term_access_keys"] = item.ProjectCloudAccessRole.ShortTermAccessKeys
 	if hc.InflateObjectWithID(item.UserGroups) != nil {
