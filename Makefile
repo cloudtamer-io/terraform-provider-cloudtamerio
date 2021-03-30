@@ -5,7 +5,7 @@ VERSION=0.1.1
 TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=github.com
 NAMESPACE=cloudtamer-io
-NAME=terraform-provider-cloudtamerio
+NAME=cloudtamerio
 BINARY=terraform-provider-${NAME}
 OS_ARCH=darwin_amd64
 
