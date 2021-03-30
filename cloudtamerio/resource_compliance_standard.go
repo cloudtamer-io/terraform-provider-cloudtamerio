@@ -18,6 +18,12 @@ func resourceComplianceStandard() *schema.Resource {
 		ReadContext:   resourceComplianceStandardRead,
 		UpdateContext: resourceComplianceStandardUpdate,
 		DeleteContext: resourceComplianceStandardDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				resourceComplianceStandardRead(ctx, d, m)
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			// Notice there is no 'id' field specified because it will be created.
 			"last_updated": {

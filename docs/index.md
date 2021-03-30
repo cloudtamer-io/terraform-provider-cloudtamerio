@@ -57,3 +57,13 @@ output "policy_id" {
 ### Optional
 
 - **skipsslvalidation** (Boolean) If true, will skip SSL validation.
+
+### Environment Variables
+
+If you want to configure the provider via environment variables, you can use these below.
+
+```bash
+export CLOUDTAMERIO_APIKEY="app_1_XXXXXXXXXXXX"
+export CLOUDTAMERIO_URL="https://cloudtamerio.example.com"
+export CLOUDTAMERIO_SKIPSSLVALIDATION="false"
+```
