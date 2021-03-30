@@ -1,4 +1,4 @@
-// Package cloudtamerio is a Terraform provider.
+// Package cloudtamerio provides the Terraform provider.
 package cloudtamerio
 
 import (
