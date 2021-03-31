@@ -34,7 +34,6 @@ type OUCloudAccessRoleCreate struct {
 	AwsIamPermissionsBoundary *int   `json:"aws_iam_permissions_boundary"`
 	AwsIamPolicies            *[]int `json:"aws_iam_policies"`
 	AwsIamRoleName            string `json:"aws_iam_role_name"`
-	AzureRoleDefinitions      []int  `json:"azure_role_definitions"`
 	LongTermAccessKeys        bool   `json:"long_term_access_keys"`
 	Name                      string `json:"name"`
 	OUID                      int    `json:"ou_id"`

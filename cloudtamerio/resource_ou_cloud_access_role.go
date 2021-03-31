@@ -135,7 +135,6 @@ func resourceOUCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData
 		AwsIamPermissionsBoundary: hc.FlattenIntPointer(d, "aws_iam_permissions_boundary"),
 		AwsIamPolicies:            hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
 		AwsIamRoleName:            d.Get("aws_iam_role_name").(string),
-		AzureRoleDefinitions:      hc.FlattenIntArray(d.Get("azure_role_definitions").([]interface{})),
 		LongTermAccessKeys:        d.Get("long_term_access_keys").(bool),
 		Name:                      d.Get("name").(string),
 		OUID:                      d.Get("ou_id").(int),
