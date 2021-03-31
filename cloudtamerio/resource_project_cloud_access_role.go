@@ -47,14 +47,6 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"archived": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"auto_pay": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"aws_iam_path": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -93,10 +85,6 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"future_accounts": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -108,10 +96,6 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"ou_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
 			},
 			"project_id": {
 				Type:     schema.TypeInt,
@@ -222,8 +206,6 @@ func resourceProjectCloudAccessRoleRead(ctx context.Context, d *schema.ResourceD
 		data["accounts"] = hc.InflateObjectWithID(item.Accounts)
 	}
 	data["apply_to_all_accounts"] = item.ProjectCloudAccessRole.ApplyToAllAccounts
-	data["archived"] = item.Project.Archived
-	data["auto_pay"] = item.Project.AutoPay
 	data["aws_iam_path"] = item.ProjectCloudAccessRole.AwsIamPath
 	if hc.InflateSingleObjectWithID(item.AwsIamPermissionsBoundary) != nil {
 		data["aws_iam_permissions_boundary"] = hc.InflateSingleObjectWithID(item.AwsIamPermissionsBoundary)
@@ -235,11 +217,9 @@ func resourceProjectCloudAccessRoleRead(ctx context.Context, d *schema.ResourceD
 	if hc.InflateObjectWithID(item.AzureRoleDefinitions) != nil {
 		data["azure_role_definitions"] = hc.InflateObjectWithID(item.AzureRoleDefinitions)
 	}
-	data["description"] = item.Project.Description
 	data["future_accounts"] = item.ProjectCloudAccessRole.FutureAccounts
 	data["long_term_access_keys"] = item.ProjectCloudAccessRole.LongTermAccessKeys
 	data["name"] = item.ProjectCloudAccessRole.Name
-	data["ou_id"] = item.Project.OUID
 	data["project_id"] = item.ProjectCloudAccessRole.ProjectID
 	data["short_term_access_keys"] = item.ProjectCloudAccessRole.ShortTermAccessKeys
 	if hc.InflateObjectWithID(item.UserGroups) != nil {

@@ -6,7 +6,6 @@ type OUCloudAccessRoleResponse struct {
 		AwsIamPermissionsBoundary *ObjectWithID  `json:"aws_iam_permissions_boundary"`
 		AwsIamPolicies            []ObjectWithID `json:"aws_iam_policies"`
 		InheritedAwsIamPolicies   []ObjectWithID `json:"inherited_aws_iam_policies"`
-		OU                        *ObjectWithID  `json:"ou"`
 		OUCloudAccessRole         struct {
 			AwsIamPath          string `json:"aws_iam_path"`
 			AwsIamRoleName      string `json:"aws_iam_role_name"`

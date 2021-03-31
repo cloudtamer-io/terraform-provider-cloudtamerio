@@ -9,7 +9,6 @@ type ProjectCloudAccessRoleResponse struct {
 		AzureRoleDefinitions          []ObjectWithID `json:"azure_role_definitions"`
 		InheritedAwsIamPolicies       []ObjectWithID `json:"inherited_aws_iam_policies"`
 		InheritedAzureRoleDefinitions []ObjectWithID `json:"inherited_azure_role_definitions"`
-		Project                       *ObjectWithID  `json:"project"`
 		ProjectCloudAccessRole        struct {
 			ApplyToAllAccounts  bool   `json:"apply_to_all_accounts"`
 			AwsIamPath          string `json:"aws_iam_path"`

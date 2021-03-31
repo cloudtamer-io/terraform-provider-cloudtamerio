@@ -57,10 +57,6 @@ func resourceOUCloudAccessRole() *schema.Resource {
 				Required: true,
 				ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"inherited_aws_iam_policies": {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -85,10 +81,6 @@ func resourceOUCloudAccessRole() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true, // Not allowed to be changed, forces new item if changed.
-			},
-			"parent_ou_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
 			},
 			"short_term_access_keys": {
 				Type:     schema.TypeBool,
@@ -194,12 +186,10 @@ func resourceOUCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, 
 		data["aws_iam_policies"] = hc.InflateObjectWithID(item.AwsIamPolicies)
 	}
 	data["aws_iam_role_name"] = item.OUCloudAccessRole.AwsIamRoleName
-	data["description"] = item.OU.Description
 	data["inherited_aws_iam_policies"] = hc.InflateObjectWithID(item.InheritedAwsIamPolicies)
 	data["long_term_access_keys"] = item.OUCloudAccessRole.LongTermAccessKeys
 	data["name"] = item.OUCloudAccessRole.Name
 	data["ou_id"] = item.OUCloudAccessRole.OUID
-	data["parent_ou_id"] = item.OU.ParentOuID
 	data["short_term_access_keys"] = item.OUCloudAccessRole.ShortTermAccessKeys
 	if hc.InflateObjectWithID(item.UserGroups) != nil {
 		data["user_groups"] = hc.InflateObjectWithID(item.UserGroups)
