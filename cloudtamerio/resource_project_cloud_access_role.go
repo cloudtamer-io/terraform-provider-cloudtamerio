@@ -159,15 +159,21 @@ func resourceProjectCloudAccessRoleCreate(ctx context.Context, d *schema.Resourc
 	c := m.(*hc.Client)
 
 	post := hc.ProjectCloudAccessRoleCreate{
-		ApplyToAllAccounts:  d.Get("apply_to_all_accounts").(bool),
-		AwsIamPath:          d.Get("aws_iam_path").(string),
-		AwsIamRoleName:      d.Get("aws_iam_role_name").(string),
-		FutureAccounts:      d.Get("future_accounts").(bool),
-		LongTermAccessKeys:  d.Get("long_term_access_keys").(bool),
-		Name:                d.Get("name").(string),
-		ProjectID:           d.Get("project_id").(int),
-		ShortTermAccessKeys: d.Get("short_term_access_keys").(bool),
-		WebAccess:           d.Get("web_access").(bool),
+		AccountIds:                hc.FlattenGenericIDPointer(d, "accounts"),
+		ApplyToAllAccounts:        d.Get("apply_to_all_accounts").(bool),
+		AwsIamPath:                d.Get("aws_iam_path").(string),
+		AwsIamPermissionsBoundary: hc.FlattenIntPointer(d, "aws_iam_permissions_boundary"),
+		AwsIamPolicies:            hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
+		AwsIamRoleName:            d.Get("aws_iam_role_name").(string),
+		AzureRoleDefinitions:      hc.FlattenGenericIDPointer(d, "azure_role_definitions"),
+		FutureAccounts:            d.Get("future_accounts").(bool),
+		LongTermAccessKeys:        d.Get("long_term_access_keys").(bool),
+		Name:                      d.Get("name").(string),
+		ProjectID:                 d.Get("project_id").(int),
+		ShortTermAccessKeys:       d.Get("short_term_access_keys").(bool),
+		UserGroupIds:              hc.FlattenGenericIDPointer(d, "user_groups"),
+		UserIds:                   hc.FlattenGenericIDPointer(d, "users"),
+		WebAccess:                 d.Get("web_access").(bool),
 	}
 
 	resp, err := c.POST("/v3/project-cloud-access-role", post)

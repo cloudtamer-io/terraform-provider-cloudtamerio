@@ -216,12 +216,23 @@ func resourceCloudRuleCreate(ctx context.Context, d *schema.ResourceData, m inte
 	c := m.(*hc.Client)
 
 	post := hc.CloudRuleCreate{
-		Description:       d.Get("description").(string),
-		Name:              d.Get("name").(string),
-		OwnerUserGroupIds: hc.FlattenGenericIDPointer(d, "owner_user_groups"),
-		OwnerUserIds:      hc.FlattenGenericIDPointer(d, "owner_users"),
-		PostWebhookID:     hc.FlattenIntPointer(d, "post_webhook_id"),
-		PreWebhookID:      hc.FlattenIntPointer(d, "pre_webhook_id"),
+		AzureArmTemplateDefinitionIds: hc.FlattenGenericIDPointer(d, "azure_arm_template_definitions"),
+		AzurePolicyDefinitionIds:      hc.FlattenGenericIDPointer(d, "azure_policy_definitions"),
+		AzureRoleDefinitionIds:        hc.FlattenGenericIDPointer(d, "azure_role_definitions"),
+		CftIds:                        hc.FlattenGenericIDPointer(d, "aws_cloudformation_templates"),
+		ComplianceStandardIds:         hc.FlattenGenericIDPointer(d, "compliance_standards"),
+		Description:                   d.Get("description").(string),
+		IamPolicyIds:                  hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
+		InternalAmiIds:                hc.FlattenGenericIDPointer(d, "internal_aws_amis"),
+		InternalPortfolioIds:          hc.FlattenGenericIDPointer(d, "internal_aws_service_catalog_portfolios"),
+		Name:                          d.Get("name").(string),
+		OUIds:                         hc.FlattenGenericIDPointer(d, "ous"),
+		OwnerUserGroupIds:             hc.FlattenGenericIDPointer(d, "owner_user_groups"),
+		OwnerUserIds:                  hc.FlattenGenericIDPointer(d, "owner_users"),
+		PostWebhookID:                 hc.FlattenIntPointer(d, "post_webhook_id"),
+		PreWebhookID:                  hc.FlattenIntPointer(d, "pre_webhook_id"),
+		ProjectIds:                    hc.FlattenGenericIDPointer(d, "projects"),
+		ServiceControlPolicyIds:       hc.FlattenGenericIDPointer(d, "service_control_policies"),
 	}
 
 	resp, err := c.POST("/v3/cloud-rule", post)

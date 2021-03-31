@@ -131,13 +131,18 @@ func resourceOUCloudAccessRoleCreate(ctx context.Context, d *schema.ResourceData
 	c := m.(*hc.Client)
 
 	post := hc.OUCloudAccessRoleCreate{
-		AwsIamPath:          d.Get("aws_iam_path").(string),
-		AwsIamRoleName:      d.Get("aws_iam_role_name").(string),
-		LongTermAccessKeys:  d.Get("long_term_access_keys").(bool),
-		Name:                d.Get("name").(string),
-		OUID:                d.Get("ou_id").(int),
-		ShortTermAccessKeys: d.Get("short_term_access_keys").(bool),
-		WebAccess:           d.Get("web_access").(bool),
+		AwsIamPath:                d.Get("aws_iam_path").(string),
+		AwsIamPermissionsBoundary: hc.FlattenIntPointer(d, "aws_iam_permissions_boundary"),
+		AwsIamPolicies:            hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
+		AwsIamRoleName:            d.Get("aws_iam_role_name").(string),
+		AzureRoleDefinitions:      hc.FlattenIntArray(d.Get("azure_role_definitions").([]interface{})),
+		LongTermAccessKeys:        d.Get("long_term_access_keys").(bool),
+		Name:                      d.Get("name").(string),
+		OUID:                      d.Get("ou_id").(int),
+		ShortTermAccessKeys:       d.Get("short_term_access_keys").(bool),
+		UserGroupIds:              hc.FlattenGenericIDPointer(d, "user_groups"),
+		UserIds:                   hc.FlattenGenericIDPointer(d, "users"),
+		WebAccess:                 d.Get("web_access").(bool),
 	}
 
 	resp, err := c.POST("/v3/ou-cloud-access-role", post)
