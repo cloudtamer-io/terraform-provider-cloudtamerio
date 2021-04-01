@@ -3,13 +3,11 @@ package ctclient
 // ProjectCloudAccessRoleResponse for: GET /api/v3/project-cloud-access-role/{id}
 type ProjectCloudAccessRoleResponse struct {
 	Data struct {
-		Accounts                      []ObjectWithID `json:"accounts"`
-		AwsIamPermissionsBoundary     *ObjectWithID  `json:"aws_iam_permissions_boundary"`
-		AwsIamPolicies                []ObjectWithID `json:"aws_iam_policies"`
-		AzureRoleDefinitions          []ObjectWithID `json:"azure_role_definitions"`
-		InheritedAwsIamPolicies       []ObjectWithID `json:"inherited_aws_iam_policies"`
-		InheritedAzureRoleDefinitions []ObjectWithID `json:"inherited_azure_role_definitions"`
-		ProjectCloudAccessRole        struct {
+		Accounts                  []ObjectWithID `json:"accounts"`
+		AwsIamPermissionsBoundary *ObjectWithID  `json:"aws_iam_permissions_boundary"`
+		AwsIamPolicies            []ObjectWithID `json:"aws_iam_policies"`
+		AzureRoleDefinitions      []ObjectWithID `json:"azure_role_definitions"`
+		ProjectCloudAccessRole    struct {
 			ApplyToAllAccounts  bool   `json:"apply_to_all_accounts"`
 			AwsIamPath          string `json:"aws_iam_path"`
 			AwsIamRoleName      string `json:"aws_iam_role_name"`

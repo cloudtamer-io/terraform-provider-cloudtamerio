@@ -57,18 +57,6 @@ func resourceOUCloudAccessRole() *schema.Resource {
 				Required: true,
 				ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
-			"inherited_aws_iam_policies": {
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-					},
-				},
-				Type:     schema.TypeList,
-				Computed: true,
-			},
 			"long_term_access_keys": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -186,7 +174,6 @@ func resourceOUCloudAccessRoleRead(ctx context.Context, d *schema.ResourceData, 
 		data["aws_iam_policies"] = hc.InflateObjectWithID(item.AwsIamPolicies)
 	}
 	data["aws_iam_role_name"] = item.OUCloudAccessRole.AwsIamRoleName
-	data["inherited_aws_iam_policies"] = hc.InflateObjectWithID(item.InheritedAwsIamPolicies)
 	data["long_term_access_keys"] = item.OUCloudAccessRole.LongTermAccessKeys
 	data["name"] = item.OUCloudAccessRole.Name
 	data["ou_id"] = item.OUCloudAccessRole.OUID
