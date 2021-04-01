@@ -38,13 +38,6 @@ description: |-
 - **users** (Block List) (see [below for nested schema](#nestedblock--users))
 - **web_access** (Boolean)
 
-### Read-only
-
-- **archived** (Boolean)
-- **auto_pay** (Boolean)
-- **description** (String)
-- **ou_id** (Number)
-
 <a id="nestedblock--accounts"></a>
 ### Nested Schema for `accounts`
 

@@ -34,12 +34,6 @@ description: |-
 - **users** (Block List) (see [below for nested schema](#nestedblock--users))
 - **web_access** (Boolean)
 
-### Read-only
-
-- **description** (String)
-- **inherited_aws_iam_policies** (List of Object) (see [below for nested schema](#nestedatt--inherited_aws_iam_policies))
-- **parent_ou_id** (Number)
-
 <a id="nestedblock--aws_iam_policies"></a>
 ### Nested Schema for `aws_iam_policies`
 
@@ -62,13 +56,5 @@ Optional:
 Optional:
 
 - **id** (Number) The ID of this resource.
-
-
-<a id="nestedatt--inherited_aws_iam_policies"></a>
-### Nested Schema for `inherited_aws_iam_policies`
-
-Read-only:
-
-- **id** (Number)
 
 
