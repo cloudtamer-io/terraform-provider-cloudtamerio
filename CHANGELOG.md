@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file.
 - Support creating, updating, and deleting resources for: OU cloud access roles and project cloud access roles.
 
 ## Changed
-- Fix bug on compliance standard creation so compliance checks are attached during creation instead of requiring a 2nd `terraform apply`.
+- Fix bug on compliance standard creation so compliance checks are attached during creation instead of requiring another `terraform apply`.
+- Fix bug on cloud rule creation so associated items are attached during creation instead of requiring another `terraform apply`.
 
 ## [0.1.1] - 2021-03-30
 ### Added
