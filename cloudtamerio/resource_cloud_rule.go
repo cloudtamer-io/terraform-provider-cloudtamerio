@@ -216,12 +216,23 @@ func resourceCloudRuleCreate(ctx context.Context, d *schema.ResourceData, m inte
 	c := m.(*hc.Client)
 
 	post := hc.CloudRuleCreate{
-		Description:       d.Get("description").(string),
-		Name:              d.Get("name").(string),
-		OwnerUserGroupIds: hc.FlattenGenericIDPointer(d, "owner_user_groups"),
-		OwnerUserIds:      hc.FlattenGenericIDPointer(d, "owner_users"),
-		PostWebhookID:     hc.FlattenIntPointer(d, "post_webhook_id"),
-		PreWebhookID:      hc.FlattenIntPointer(d, "pre_webhook_id"),
+		AzureArmTemplateDefinitionIds: hc.FlattenGenericIDPointer(d, "azure_arm_template_definitions"),
+		AzurePolicyDefinitionIds:      hc.FlattenGenericIDPointer(d, "azure_policy_definitions"),
+		AzureRoleDefinitionIds:        hc.FlattenGenericIDPointer(d, "azure_role_definitions"),
+		CftIds:                        hc.FlattenGenericIDPointer(d, "aws_cloudformation_templates"),
+		ComplianceStandardIds:         hc.FlattenGenericIDPointer(d, "compliance_standards"),
+		Description:                   d.Get("description").(string),
+		IamPolicyIds:                  hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
+		InternalAmiIds:                hc.FlattenGenericIDPointer(d, "internal_aws_amis"),
+		InternalPortfolioIds:          hc.FlattenGenericIDPointer(d, "internal_aws_service_catalog_portfolios"),
+		Name:                          d.Get("name").(string),
+		OUIds:                         hc.FlattenGenericIDPointer(d, "ous"),
+		OwnerUserGroupIds:             hc.FlattenGenericIDPointer(d, "owner_user_groups"),
+		OwnerUserIds:                  hc.FlattenGenericIDPointer(d, "owner_users"),
+		PostWebhookID:                 hc.FlattenIntPointer(d, "post_webhook_id"),
+		PreWebhookID:                  hc.FlattenIntPointer(d, "pre_webhook_id"),
+		ProjectIds:                    hc.FlattenGenericIDPointer(d, "projects"),
+		ServiceControlPolicyIds:       hc.FlattenGenericIDPointer(d, "service_control_policies"),
 	}
 
 	resp, err := c.POST("/v3/cloud-rule", post)
@@ -293,8 +304,8 @@ func resourceCloudRuleRead(ctx context.Context, d *schema.ResourceData, m interf
 		data["internal_aws_service_catalog_portfolios"] = hc.InflateObjectWithID(item.InternalAwsServiceCatalogPortfolios)
 	}
 	data["name"] = item.CloudRule.Name
-	if hc.InflateObjectWithID(item.Ous) != nil {
-		data["ous"] = hc.InflateObjectWithID(item.Ous)
+	if hc.InflateObjectWithID(item.OUs) != nil {
+		data["ous"] = hc.InflateObjectWithID(item.OUs)
 	}
 	if hc.InflateObjectWithID(item.OwnerUserGroups) != nil {
 		data["owner_user_groups"] = hc.InflateObjectWithID(item.OwnerUserGroups)
@@ -384,7 +395,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		arrAddIamPolicyIds, arrRemoveIamPolicyIds, _, err := hc.AssociationChanged(d, "aws_iam_policies")
 		arrAddInternalAmiIds, arrRemoveInternalAmiIds, _, err := hc.AssociationChanged(d, "internal_aws_amis")
 		arrAddInternalPortfolioIds, arrRemoveInternalPortfolioIds, _, err := hc.AssociationChanged(d, "internal_aws_service_catalog_portfolios")
-		arrAddOuIds, arrRemoveOuIds, _, err := hc.AssociationChanged(d, "ous")
+		arrAddOUIds, arrRemoveOUIds, _, err := hc.AssociationChanged(d, "ous")
 		arrAddProjectIds, arrRemoveProjectIds, _, err := hc.AssociationChanged(d, "projects")
 		arrAddServiceControlPolicyIds, arrRemoveServiceControlPolicyIds, _, err := hc.AssociationChanged(d, "service_control_policies")
 
@@ -396,7 +407,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			len(arrAddIamPolicyIds) > 0 ||
 			len(arrAddInternalAmiIds) > 0 ||
 			len(arrAddInternalPortfolioIds) > 0 ||
-			len(arrAddOuIds) > 0 ||
+			len(arrAddOUIds) > 0 ||
 			len(arrAddProjectIds) > 0 ||
 			len(arrAddServiceControlPolicyIds) > 0 {
 			_, err = c.POST(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsAdd{
@@ -408,7 +419,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				IamPolicyIds:                  &arrAddIamPolicyIds,
 				InternalAmiIds:                &arrAddInternalAmiIds,
 				InternalPortfolioIds:          &arrAddInternalPortfolioIds,
-				OuIds:                         &arrAddOuIds,
+				OUIds:                         &arrAddOUIds,
 				ProjectIds:                    &arrAddProjectIds,
 				ServiceControlPolicyIds:       &arrAddServiceControlPolicyIds,
 			})
@@ -430,7 +441,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			len(arrRemoveIamPolicyIds) > 0 ||
 			len(arrRemoveInternalAmiIds) > 0 ||
 			len(arrRemoveInternalPortfolioIds) > 0 ||
-			len(arrRemoveOuIds) > 0 ||
+			len(arrRemoveOUIds) > 0 ||
 			len(arrRemoveProjectIds) > 0 ||
 			len(arrRemoveServiceControlPolicyIds) > 0 {
 			err = c.DELETE(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsRemove{
@@ -442,7 +453,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				IamPolicyIds:                  &arrRemoveIamPolicyIds,
 				InternalAmiIds:                &arrRemoveInternalAmiIds,
 				InternalPortfolioIds:          &arrRemoveInternalPortfolioIds,
-				OuIds:                         &arrRemoveOuIds,
+				OUIds:                         &arrRemoveOUIds,
 				ProjectIds:                    &arrRemoveProjectIds,
 				ServiceControlPolicyIds:       &arrRemoveServiceControlPolicyIds,
 			})

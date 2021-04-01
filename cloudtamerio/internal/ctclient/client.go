@@ -1,3 +1,5 @@
+// Package ctclient provides a client for interacting with the cloudtamer.io
+// application.
 package ctclient
 
 import (

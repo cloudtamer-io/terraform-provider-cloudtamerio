@@ -4,6 +4,7 @@ The Terraform provider for cloudtamer.io allows you interact with the cloudtamer
 
 - [terraform-provider-cloudtamerio](#terraform-provider-cloudtamerio)
   - [Getting Started](#getting-started)
+    - [Importing Resource State](#importing-resource-state)
   - [Sample Commands](#sample-commands)
     - [Resources](#resources)
     - [Data Sources](#data-sources)
@@ -80,6 +81,23 @@ terraform apply --auto-approve
 
 You can now make changes to the `main.tf` file and then re-run the `apply` command to push the changes to cloudtamer.io.
 
+### Importing Resource State
+
+This provider does support [importing state for resources](https://www.terraform.io/docs/cli/import/index.html). You will need to create the Terraform files and then you can run commands like this to generate the `terraform.tfstate` so you don't have to delete all your resources and then recreate them to work with Terraform:
+
+```bash
+# Initialize the project.
+terraform init
+
+# Import the resource from your environment - this assumes you have a module called
+# 'aws-cloudformation-template' and you are importing into a resource you defined as 'AuditLogging'.
+# The '20' at the end is the ID of the resource in cloudtamer.io.
+terraform import module.aws-cloudformation-template.cloudtamerio_aws_cloudformation_template.AuditLogging 20
+
+# Verify the state is correct - there shouldn't be any changes listed.
+terraform plan
+```
+
 ## Sample Commands
 
 Below is a collection of sample commands when working with the Terraform provider.
@@ -131,7 +149,7 @@ resource "cloudtamerio_aws_cloudformation_template" "t1" {
   policy = <<EOF
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Creates a test IAM role2.",
+    "Description": "Creates a test IAM role.",
     "Metadata": {
         "VersionDate": {
             "Value": "20180718"
@@ -232,6 +250,50 @@ resource "cloudtamerio_cloud_rule" "cr1" {
 # Output the ID of the resource created.
 output "check_id" {
   value = cloudtamerio_cloud_rule.cr1.id
+}
+```
+
+```hcl
+# Create a cloud access role on a project.
+resource "cloudtamerio_project_cloud_access_role" "carp1" {
+  name                   = "sample-car"
+  project_id             = 1
+  aws_iam_role_name      = "sample-car"
+  web_access             = true
+  short_term_access_keys = true
+  long_term_access_keys  = true
+  aws_iam_policies { id = 1 }
+  aws_iam_permissions_boundary = 1
+  future_accounts              = true
+  #accounts { id = 1 }
+  users { id = 1 }
+  user_groups { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "project_car_id" {
+  value = cloudtamerio_project_cloud_access_role.carp1.id
+}
+```
+
+```hcl
+# Create a cloud access role on an OU.
+resource "cloudtamerio_ou_cloud_access_role" "carou1" {
+  name                   = "sample-car"
+  ou_id                  = 3
+  aws_iam_role_name      = "sample-car"
+  web_access             = true
+  short_term_access_keys = true
+  long_term_access_keys  = true
+  aws_iam_policies { id = 628 }
+  #aws_iam_permissions_boundary = 1
+  users { id = 1 }
+  user_groups { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "ou_car_id" {
+  value = cloudtamerio_ou_cloud_access_role.carou1.id
 }
 ```
 

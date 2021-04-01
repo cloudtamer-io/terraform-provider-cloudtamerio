@@ -32,7 +32,7 @@ type CloudRuleResponse struct {
 		ComplianceStandards                 []ObjectWithID `json:"compliance_standards"`
 		InternalAwsAmis                     []ObjectWithID `json:"internal_aws_amis"`
 		InternalAwsServiceCatalogPortfolios []ObjectWithID `json:"internal_aws_service_catalog_portfolios"`
-		Ous                                 []ObjectWithID `json:"ous"`
+		OUs                                 []ObjectWithID `json:"ous"`
 		OwnerUserGroups                     []ObjectWithID `json:"owner_user_groups"`
 		OwnerUsers                          []ObjectWithID `json:"owner_users"`
 		Projects                            []ObjectWithID `json:"projects"`
@@ -53,7 +53,7 @@ type CloudRuleCreate struct {
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
 	Name                          string `json:"name"`
-	OuIds                         *[]int `json:"ou_ids"`
+	OUIds                         *[]int `json:"ou_ids"`
 	OwnerUserGroupIds             *[]int `json:"owner_user_group_ids"`
 	OwnerUserIds                  *[]int `json:"owner_user_ids"`
 	PostWebhookID                 *int   `json:"post_webhook_id"`
@@ -80,7 +80,7 @@ type CloudRuleAssociationsAdd struct {
 	IamPolicyIds                  *[]int `json:"iam_policy_ids"`
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
-	OuIds                         *[]int `json:"ou_ids"`
+	OUIds                         *[]int `json:"ou_ids"`
 	ProjectIds                    *[]int `json:"project_ids"`
 	ServiceControlPolicyIds       *[]int `json:"service_control_policy_ids"`
 }
@@ -95,7 +95,7 @@ type CloudRuleAssociationsRemove struct {
 	IamPolicyIds                  *[]int `json:"iam_policy_ids"`
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
-	OuIds                         *[]int `json:"ou_ids"`
+	OUIds                         *[]int `json:"ou_ids"`
 	ProjectIds                    *[]int `json:"project_ids"`
 	ServiceControlPolicyIds       *[]int `json:"service_control_policy_ids"`
 }

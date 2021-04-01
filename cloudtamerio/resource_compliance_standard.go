@@ -97,11 +97,12 @@ func resourceComplianceStandardCreate(ctx context.Context, d *schema.ResourceDat
 	c := m.(*hc.Client)
 
 	post := hc.ComplianceStandardCreate{
-		CreatedByUserID:   d.Get("created_by_user_id").(int),
-		Description:       d.Get("description").(string),
-		Name:              d.Get("name").(string),
-		OwnerUserGroupIds: hc.FlattenGenericIDPointer(d, "owner_user_groups"),
-		OwnerUserIds:      hc.FlattenGenericIDPointer(d, "owner_users"),
+		ComplianceCheckIds: hc.FlattenGenericIDPointer(d, "compliance_checks"),
+		CreatedByUserID:    d.Get("created_by_user_id").(int),
+		Description:        d.Get("description").(string),
+		Name:               d.Get("name").(string),
+		OwnerUserGroupIds:  hc.FlattenGenericIDPointer(d, "owner_user_groups"),
+		OwnerUserIds:       hc.FlattenGenericIDPointer(d, "owner_users"),
 	}
 
 	resp, err := c.POST("/v3/compliance/standard", post)

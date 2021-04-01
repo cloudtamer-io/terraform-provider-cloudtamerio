@@ -82,9 +82,7 @@ func FlattenIntArrayPointer(d *schema.ResourceData, key string) *[]int {
 	if i, ok := d.GetOk(key); ok {
 		v := i.([]int)
 		arr := make([]int, 0)
-		for _, item := range v {
-			arr = append(arr, item)
-		}
+		arr = append(arr, v...)
 		return &arr
 	}
 
@@ -158,6 +156,15 @@ func InflateObjectWithID(arr []ObjectWithID) []interface{} {
 	return make([]interface{}, 0)
 }
 
+// InflateSingleObjectWithID -
+func InflateSingleObjectWithID(single *ObjectWithID) interface{} {
+	if single != nil {
+		return single.ID
+	}
+
+	return nil
+}
+
 // FieldsChanged -
 func FieldsChanged(iOld interface{}, iNew interface{}, fields []string) (map[string]interface{}, string, bool) {
 	mOld := iOld.(map[string]interface{})
@@ -202,6 +209,30 @@ func AssociationChanged(d *schema.ResourceData, fieldname string) ([]int, []int,
 	}
 
 	return arrUserAdd, arrUserRemove, isChanged, nil
+}
+
+// AssociationChangedInt returns an int of a value to change.
+// The fields needs to be at the top level.
+func AssociationChangedInt(d *schema.ResourceData, fieldname string) (*int, *int, bool, error) {
+	isChanged := false
+	io, in := d.GetChange(fieldname)
+
+	// If the values are not the same, then they changed.
+	if in != io {
+		isChanged = true
+
+		if in == nil || in == 0 {
+			// Either the in value is null which means remove the existing value.
+			old := io.(int)
+			return nil, &old, isChanged, nil
+		}
+		// Or the in value is not null which means it should change the
+		// existing value.
+		newvalue := in.(int)
+		return &newvalue, nil, isChanged, nil
+	}
+
+	return nil, nil, isChanged, nil
 }
 
 // DetermineAssociations will take in a src array (source of truth/repo) and a
