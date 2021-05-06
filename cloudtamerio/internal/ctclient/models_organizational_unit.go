@@ -1,29 +1,26 @@
 package ctclient
 
-// OrganizationalUnitListResponse for: GET /api/v3/ou
-type OrganizationalUnitListResponse struct {
+// OUListResponse for: GET /api/v3/ou
+type OUListResponse struct {
 	Data []struct {
-		CreatedAt     string `json:"created_at"`
-		Description   string `json:"description"`
-		ID            int    `json:"id"`
-		Name          string `json:"name"`
-		PostWebhookID *int   `json:"post_webhook_id"`
-		PreWebhookID  *int   `json:"pre_webhook_id"`
+		CreatedAt   string `json:"created_at"`
+		Description string `json:"description"`
+		ID          int    `json:"id"`
+		Name        string `json:"name"`
+		ParentOuID  int    `json:"parent_ou_id"`
 	} `json:"data"`
 	Status int `json:"status"`
 }
 
-// CloudRuleResponse for: GET /api/v3/ou/{id}
-type OrganizationalUnitResponse struct {
+// OUResponse for: GET /api/v3/ou/{id}
+type OUResponse struct {
 	Data struct {
 		OU struct {
-			CreatedAt     string `json:"created_at"`
-			Description   string `json:"description"`
-			ID            int    `json:"id"`
-			Name          string `json:"name"`
-			ParentOUID    int    `json:"parent_ou_id"`
-			PostWebhookID *int   `json:"post_webhook_id"`
-			PreWebhookID  *int   `json:"pre_webhook_id"`
+			CreatedAt   string `json:"created_at"`
+			Description string `json:"description"`
+			ID          int    `json:"id"`
+			Name        string `json:"name"`
+			ParentOuID  int    `json:"parent_ou_id"`
 		} `json:"ou"`
 		OwnerUserGroups []ObjectWithID `json:"owner_user_groups"`
 		OwnerUsers      []ObjectWithID `json:"owner_users"`
@@ -31,28 +28,25 @@ type OrganizationalUnitResponse struct {
 	Status int `json:"status"`
 }
 
-// OrganizationalUnitCreate for: POST /api/v3/ou
-type OrganizationalUnitCreate struct {
+// OUCreate for: POST /api/v3/ou
+type OUCreate struct {
 	Description        string `json:"description"`
 	Name               string `json:"name"`
 	OwnerUserGroupIds  *[]int `json:"owner_user_group_ids"`
 	OwnerUserIds       *[]int `json:"owner_user_ids"`
-	ParentOUID         int    `json:"parent_ou_id"`
-	PermissionSchemeId int    `json:"permission_scheme_id"`
-	PostWebhookID      *int   `json:"post_webhook_id"`
-	PreWebhookID       *int   `json:"pre_webhook_id"`
+	ParentOuID         int    `json:"parent_ou_id"`
+	PermissionSchemeID int    `json:"permission_scheme_id"`
 }
 
-// OrganizationalUnitUpdate for: PATCH /api/v3/ou/{id}
-type OrganizationalUnitUpdate struct {
-	Description   string `json:"description"`
-	Name          string `json:"name"`
-	PostWebhookID *int   `json:"post_webhook_id"`
-	PreWebhookID  *int   `json:"pre_webhook_id"`
+// OUUpdatable for: PATCH /api/v3/ou/{id}
+type OUUpdatable struct {
+	Description string `json:"description"`
+	Name        string `json:"name"`
 }
 
-type OrganizationalUnitPermissionAdd struct {
-	AppRoleId         *int   `json:"app_role_id"`
+// OUPermissionAdd for: POST /v3/ou/{id}/permission-mapping
+type OUPermissionAdd struct {
+	AppRoleID         *int   `json:"app_role_id"`
 	OwnerUserGroupIds *[]int `json:"user_groups_ids"`
 	OwnerUserIds      *[]int `json:"user_ids"`
 	PostWebhookID     *int   `json:"post_webhook_id"`

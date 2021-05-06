@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	hc "github.com/cloudtamer-io/terraform-provider-cloudtamerio/cloudtamerio/internal/ctclient"
@@ -26,9 +25,14 @@ func resourceOrganizationalUnit() *schema.Resource {
 			},
 		},
 		Schema: map[string]*schema.Schema{
+			// Notice there is no 'id' field specified because it will be created.
 			"last_updated": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"description": {
@@ -37,7 +41,7 @@ func resourceOrganizationalUnit() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"owner_user_groups": {
 				Elem: &schema.Resource{
@@ -50,6 +54,7 @@ func resourceOrganizationalUnit() *schema.Resource {
 				},
 				Type:     schema.TypeList,
 				Optional: true,
+				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"owner_users": {
 				Elem: &schema.Resource{
@@ -62,14 +67,17 @@ func resourceOrganizationalUnit() *schema.Resource {
 				},
 				Type:     schema.TypeList,
 				Optional: true,
+				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"parent_ou_id": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Required: true,
+				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"permission_scheme_id": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Required: true,
+				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 		},
 	}
@@ -79,15 +87,13 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 
-	post := hc.OrganizationalUnitCreate{
-		Name:               d.Get("name").(string),
+	post := hc.OUCreate{
 		Description:        d.Get("description").(string),
-		ParentOUID:         d.Get("parent_ou_id").(int),
-		PermissionSchemeId: d.Get("permission_scheme_id").(int),
+		Name:               d.Get("name").(string),
 		OwnerUserGroupIds:  hc.FlattenGenericIDPointer(d, "owner_user_groups"),
 		OwnerUserIds:       hc.FlattenGenericIDPointer(d, "owner_users"),
-		PostWebhookID:      hc.FlattenIntPointer(d, "post_webhook_id"),
-		PreWebhookID:       hc.FlattenIntPointer(d, "pre_webhook_id"),
+		ParentOuID:         d.Get("parent_ou_id").(int),
+		PermissionSchemeID: d.Get("permission_scheme_id").(int),
 	}
 
 	resp, err := c.POST("/v3/ou", post)
@@ -119,47 +125,35 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 	c := m.(*hc.Client)
 	ID := d.Id()
 
-	resp := new(hc.OrganizationalUnitResponse)
+	resp := new(hc.OUResponse)
 	err := c.GET(fmt.Sprintf("/v3/ou/%s", ID), resp)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			d.SetId("")
-		} else {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Organizaitonal Unit",
-				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-			})
-		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to read OrganizationalUnit",
+			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+		})
 		return diags
-
 	}
 	item := resp.Data
 
 	data := make(map[string]interface{})
-	data["name"] = item.OU.Name
+	data["created_at"] = item.OU.CreatedAt
 	data["description"] = item.OU.Description
-	data["parent_ou_id"] = item.OU.ParentOUID
-	data["owner_user_groups"] = make([]interface{}, 0)
+	data["name"] = item.OU.Name
 	if hc.InflateObjectWithID(item.OwnerUserGroups) != nil {
 		data["owner_user_groups"] = hc.InflateObjectWithID(item.OwnerUserGroups)
 	}
-	data["owner_users"] = make([]interface{}, 0)
 	if hc.InflateObjectWithID(item.OwnerUsers) != nil {
 		data["owner_users"] = hc.InflateObjectWithID(item.OwnerUsers)
 	}
-	if item.OU.PostWebhookID != nil {
-		data["post_webhook_id"] = item.OU.PostWebhookID
-	}
-	if item.OU.PreWebhookID != nil {
-		data["pre_webhook_id"] = item.OU.PreWebhookID
-	}
+	data["parent_ou_id"] = item.OU.ParentOuID
 
 	for k, v := range data {
 		if err := d.Set(k, v); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to read and set Organizational Unit",
+				Summary:  "Unable to read and set OrganizationalUnit",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
@@ -176,23 +170,23 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 
 	hasChanged := 0
 
+	// Determine if the attributes that are updatable are changed.
+	// Leave out fields that are not allowed to be changed like
+	// `aws_iam_path` in AWS IAM policies and add `ForceNew: true` to the
+	// schema instead.
 	if d.HasChanges("description",
-		"name",
-		"post_webhook_id",
-		"pre_webhook_id") {
+		"name") {
 		hasChanged++
-		req := hc.OrganizationalUnitUpdate{
-			Description:   d.Get("description").(string),
-			Name:          d.Get("name").(string),
-			PostWebhookID: hc.FlattenIntPointer(d, "post_webhook_id"),
-			PreWebhookID:  hc.FlattenIntPointer(d, "pre_webhook_id"),
+		req := hc.OUUpdatable{
+			Description: d.Get("description").(string),
+			Name:        d.Get("name").(string),
 		}
 
 		err := c.PATCH(fmt.Sprintf("/v3/ou/%s", ID), req)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to update CloudRule",
+				Summary:  "Unable to update OrganizationalUnit",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
@@ -245,8 +239,8 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 			len(arrRemoveOwnerUserGroupIds) > 0 ||
 			len(arrAddOwnerUserId) > 0 ||
 			len(arrRemoveOwnerUserId) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/ou/%s/permission-mapping", ID), hc.OrganizationalUnitPermissionAdd{
-				AppRoleId:         arrPermissionSchemaId,
+			_, err = c.POST(fmt.Sprintf("/v3/ou/%s/permission-mapping", ID), hc.OUPermissionAdd{
+				AppRoleID:         arrPermissionSchemaId,
 				OwnerUserGroupIds: d.Get("owner_user").(*[]int),
 				OwnerUserIds:      d.Get("owner_user_group").(*[]int),
 			})
