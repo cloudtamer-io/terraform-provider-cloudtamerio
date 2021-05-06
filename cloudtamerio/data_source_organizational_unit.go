@@ -42,6 +42,10 @@ func dataSourceOrganizationalUnit() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"created_at": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"description": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -54,14 +58,8 @@ func dataSourceOrganizationalUnit() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"post_webhook_id": {
+						"parent_ou_id": {
 							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
-						},
-						"pre_webhook_id": {
-							Type:     schema.TypeInt,
-							Optional: true,
 							Computed: true,
 						},
 					},
@@ -75,7 +73,7 @@ func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 
-	resp := new(hc.OrganizationalUnitListResponse)
+	resp := new(hc.OUListResponse)
 	err := c.GET("/v3/ou", resp)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
@@ -91,15 +89,11 @@ func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 	arr := make([]map[string]interface{}, 0)
 	for _, item := range resp.Data {
 		data := make(map[string]interface{})
+		data["created_at"] = item.CreatedAt
 		data["description"] = item.Description
 		data["id"] = item.ID
 		data["name"] = item.Name
-		if item.PostWebhookID != nil {
-			data["post_webhook_id"] = item.PostWebhookID
-		}
-		if item.PreWebhookID != nil {
-			data["pre_webhook_id"] = item.PreWebhookID
-		}
+		data["parent_ou_id"] = item.ParentOuID
 
 		match, err := f.Match(data)
 		if err != nil {
