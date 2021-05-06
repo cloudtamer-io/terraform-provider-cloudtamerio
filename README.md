@@ -248,7 +248,7 @@ resource "cloudtamerio_cloud_rule" "cr1" {
 }
 
 # Output the ID of the resource created.
-output "check_id" {
+output "rule_id" {
   value = cloudtamerio_cloud_rule.cr1.id
 }
 ```
