@@ -42,7 +42,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_compliance_standard":         resourceComplianceStandard(),
 			"cloudtamerio_ou_cloud_access_role":        resourceOUCloudAccessRole(),
 			"cloudtamerio_project_cloud_access_role":   resourceProjectCloudAccessRole(),
-			"cloudtamerio_organizational_unit":         resourceOrganizationalUnit(),
+			"cloudtamerio_organizational_unit":         resourceOU(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cloudtamerio_aws_cloudformation_template": dataSourceAwsCloudformationTemplate(),
@@ -51,7 +51,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_cloud_rule":                  dataSourceCloudRule(),
 			"cloudtamerio_compliance_check":            dataSourceComplianceCheck(),
 			"cloudtamerio_compliance_standard":         dataSourceComplianceStandard(),
-			"cloudtamerio_organizational_unit":         dataSourceOrganizationalUnit(),
+			"cloudtamerio_organizational_unit":         dataSourceOU(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceOrganizationalUnit() *schema.Resource {
+func dataSourceOU() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceOrganizationalUnitRead,
+		ReadContext: dataSourceOURead,
 		Schema: map[string]*schema.Schema{
 			"filter": {
 				Type:     schema.TypeList,
@@ -69,7 +69,7 @@ func dataSourceOrganizationalUnit() *schema.Resource {
 	}
 }
 
-func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceOURead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 
@@ -78,7 +78,7 @@ func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to read OrganizationalUnit",
+			Summary:  "Unable to read OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), "all"),
 		})
 		return diags
@@ -99,7 +99,7 @@ func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to filter OrganizationalUnit",
+				Summary:  "Unable to filter OU",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), "filter"),
 			})
 			return diags
@@ -113,7 +113,7 @@ func dataSourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 	if err := d.Set("list", arr); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to read OrganizationalUnit",
+			Summary:  "Unable to read OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), "all"),
 		})
 		return diags

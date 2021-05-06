@@ -12,15 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceOrganizationalUnit() *schema.Resource {
+func resourceOU() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceOrganizationalUnitCreate,
-		ReadContext:   resourceOrganizationalUnitRead,
-		UpdateContext: resourceOrganizationalUnitUpdate,
-		DeleteContext: resourceOrganizationalUnitDelete,
+		CreateContext: resourceOUCreate,
+		ReadContext:   resourceOURead,
+		UpdateContext: resourceOUUpdate,
+		DeleteContext: resourceOUDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				resourceOrganizationalUnitRead(ctx, d, m)
+				resourceOURead(ctx, d, m)
 				return []*schema.ResourceData{d}, nil
 			},
 		},
@@ -83,7 +83,7 @@ func resourceOrganizationalUnit() *schema.Resource {
 	}
 }
 
-func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 
@@ -100,14 +100,14 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to create OrganizationalUnit",
+			Summary:  "Unable to create OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), post),
 		})
 		return diags
 	} else if resp.RecordID == 0 {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to create OrganizationalUnit",
+			Summary:  "Unable to create OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", errors.New("received item ID of 0"), post),
 		})
 		return diags
@@ -115,12 +115,12 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(strconv.Itoa(resp.RecordID))
 
-	resourceOrganizationalUnitRead(ctx, d, m)
+	resourceOURead(ctx, d, m)
 
 	return diags
 }
 
-func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOURead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -130,7 +130,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to read OrganizationalUnit",
+			Summary:  "Unable to read OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 		})
 		return diags
@@ -153,7 +153,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 		if err := d.Set(k, v); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to read and set OrganizationalUnit",
+				Summary:  "Unable to read and set OU",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
@@ -163,7 +163,7 @@ func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData,
 	return diags
 }
 
-func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -186,96 +186,27 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Unable to update OrganizationalUnit",
+				Summary:  "Unable to update OU",
 				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 			})
 			return diags
 		}
 	}
 
-	if d.HasChanges("parent_ou_id") {
-		hasChanged++
-		arrParentOUID, _, _, err := hc.AssociationChangedInt(d, "parent_ou_id")
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to determine changeset for ParentOU on OrganizationalUnit",
-				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-			})
-			return diags
-		}
-		_, err = c.POST(fmt.Sprintf("/v2/ou/%s/move", ID), arrParentOUID)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to add update Parent OU for Organizational Unit",
-				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-			})
-			return diags
-		}
-	}
-
-	// Handle associations.
-	if d.HasChanges(
-		"permission_scheme_id",
-		"owner_user_group",
-		"owner_user") {
-		hasChanged++
-		arrPermissionSchemaId, arrRemovePermissionSchemaId, _, err := hc.AssociationChangedInt(d, "permission_scheme_id")
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_user_group")
-		arrAddOwnerUserId, arrRemoveOwnerUserId, _, err := hc.AssociationChanged(d, "owner_user")
-
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to add determining changeset for OrganizationalUnit",
-				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-			})
-			return diags
-		}
-
-		if arrPermissionSchemaId != nil ||
-			len(arrAddOwnerUserGroupIds) > 0 ||
-			len(arrRemoveOwnerUserGroupIds) > 0 ||
-			len(arrAddOwnerUserId) > 0 ||
-			len(arrRemoveOwnerUserId) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/ou/%s/permission-mapping", ID), hc.OUPermissionAdd{
-				AppRoleID:         arrPermissionSchemaId,
-				OwnerUserGroupIds: d.Get("owner_user").(*[]int),
-				OwnerUserIds:      d.Get("owner_user_group").(*[]int),
-			})
-			if err != nil {
-				diags = append(diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  "Unable to add update Permission mapping for Organizational Unit",
-					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-				})
-				return diags
-			}
-		}
-
-		if arrRemovePermissionSchemaId != nil {
-			// TODO: Figure how to patch/delete permissions schema changes
-			err = nil
-			if err != nil {
-				diags = append(diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  "Unable to remove owners on CloudRule",
-					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
-				})
-				return diags
-			}
-		}
+	// Allow moving an OU if the parent ID changes and updating permissions.
+	diags, hasChanged = OUChanges(c, d, diags, hasChanged)
+	if len(diags) > 0 {
+		return diags
 	}
 
 	if hasChanged > 0 {
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
-	return resourceOrganizationalUnitRead(ctx, d, m)
+	return resourceOURead(ctx, d, m)
 }
 
-func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOUDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*hc.Client)
 	ID := d.Id()
@@ -284,7 +215,7 @@ func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Unable to delete OrganizationalUnit",
+			Summary:  "Unable to delete OU",
 			Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
 		})
 		return diags
