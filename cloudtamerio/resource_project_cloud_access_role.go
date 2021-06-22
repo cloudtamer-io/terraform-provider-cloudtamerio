@@ -230,6 +230,11 @@ func resourceProjectCloudAccessRoleRead(ctx context.Context, d *schema.ResourceD
 	}
 	data["web_access"] = item.ProjectCloudAccessRole.WebAccess
 
+	// If the CAR is supposed to apply to all accounts, then don't make changes to accounts.
+	if d.Get("apply_to_all_accounts").(bool) {
+		data["accounts"] = d.Get("accounts")
+	}
+
 	for k, v := range data {
 		if err := d.Set(k, v); err != nil {
 			diags = append(diags, diag.Diagnostic{
@@ -296,6 +301,12 @@ func resourceProjectCloudAccessRoleUpdate(ctx context.Context, d *schema.Resourc
 		arrAddAzureRoleDefinitions, arrRemoveAzureRoleDefinitions, _, _ := hc.AssociationChanged(d, "azure_role_definitions")
 		arrAddUserGroupIds, arrRemoveUserGroupIds, _, _ := hc.AssociationChanged(d, "user_groups")
 		arrAddUserIds, arrRemoveUserIds, _, _ := hc.AssociationChanged(d, "users")
+
+		// If the CAR is supposed to apply to all accounts, then don't make changes to accounts.
+		if d.Get("apply_to_all_accounts").(bool) {
+			arrAddAccountIds = []int{}
+			arrRemoveAccountIds = []int{}
+		}
 
 		if len(arrAddAccountIds) > 0 ||
 			arrAddAwsIamPermissionsBoundary != nil ||
