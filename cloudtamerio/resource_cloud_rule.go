@@ -387,17 +387,17 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		"projects",
 		"service_control_policies") {
 		hasChanged++
-		arrAddAzureArmTemplateDefinitionIds, arrRemoveAzureArmTemplateDefinitionIds, _, err := hc.AssociationChanged(d, "azure_arm_template_definitions")
-		arrAddAzurePolicyDefinitionIds, arrRemoveAzurePolicyDefinitionIds, _, err := hc.AssociationChanged(d, "azure_policy_definitions")
-		arrAddAzureRoleDefinitionIds, arrRemoveAzureRoleDefinitionIds, _, err := hc.AssociationChanged(d, "azure_role_definitions")
-		arrAddCftIds, arrRemoveCftIds, _, err := hc.AssociationChanged(d, "aws_cloudformation_templates")
-		arrAddComplianceStandardIds, arrRemoveComplianceStandardIds, _, err := hc.AssociationChanged(d, "compliance_standards")
-		arrAddIamPolicyIds, arrRemoveIamPolicyIds, _, err := hc.AssociationChanged(d, "aws_iam_policies")
-		arrAddInternalAmiIds, arrRemoveInternalAmiIds, _, err := hc.AssociationChanged(d, "internal_aws_amis")
-		arrAddInternalPortfolioIds, arrRemoveInternalPortfolioIds, _, err := hc.AssociationChanged(d, "internal_aws_service_catalog_portfolios")
-		arrAddOUIds, arrRemoveOUIds, _, err := hc.AssociationChanged(d, "ous")
-		arrAddProjectIds, arrRemoveProjectIds, _, err := hc.AssociationChanged(d, "projects")
-		arrAddServiceControlPolicyIds, arrRemoveServiceControlPolicyIds, _, err := hc.AssociationChanged(d, "service_control_policies")
+		arrAddAzureArmTemplateDefinitionIds, arrRemoveAzureArmTemplateDefinitionIds, _, _ := hc.AssociationChanged(d, "azure_arm_template_definitions")
+		arrAddAzurePolicyDefinitionIds, arrRemoveAzurePolicyDefinitionIds, _, _ := hc.AssociationChanged(d, "azure_policy_definitions")
+		arrAddAzureRoleDefinitionIds, arrRemoveAzureRoleDefinitionIds, _, _ := hc.AssociationChanged(d, "azure_role_definitions")
+		arrAddCftIds, arrRemoveCftIds, _, _ := hc.AssociationChanged(d, "aws_cloudformation_templates")
+		arrAddComplianceStandardIds, arrRemoveComplianceStandardIds, _, _ := hc.AssociationChanged(d, "compliance_standards")
+		arrAddIamPolicyIds, arrRemoveIamPolicyIds, _, _ := hc.AssociationChanged(d, "aws_iam_policies")
+		arrAddInternalAmiIds, arrRemoveInternalAmiIds, _, _ := hc.AssociationChanged(d, "internal_aws_amis")
+		arrAddInternalPortfolioIds, arrRemoveInternalPortfolioIds, _, _ := hc.AssociationChanged(d, "internal_aws_service_catalog_portfolios")
+		arrAddOUIds, arrRemoveOUIds, _, _ := hc.AssociationChanged(d, "ous")
+		arrAddProjectIds, arrRemoveProjectIds, _, _ := hc.AssociationChanged(d, "projects")
+		arrAddServiceControlPolicyIds, arrRemoveServiceControlPolicyIds, _, _ := hc.AssociationChanged(d, "service_control_policies")
 
 		if len(arrAddAzureArmTemplateDefinitionIds) > 0 ||
 			len(arrAddAzurePolicyDefinitionIds) > 0 ||
@@ -410,7 +410,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			len(arrAddOUIds) > 0 ||
 			len(arrAddProjectIds) > 0 ||
 			len(arrAddServiceControlPolicyIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsAdd{
+			_, err := c.POST(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsAdd{
 				AzureArmTemplateDefinitionIds: &arrAddAzureArmTemplateDefinitionIds,
 				AzurePolicyDefinitionIds:      &arrAddAzurePolicyDefinitionIds,
 				AzureRoleDefinitionIds:        &arrAddAzureRoleDefinitionIds,
@@ -444,7 +444,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			len(arrRemoveOUIds) > 0 ||
 			len(arrRemoveProjectIds) > 0 ||
 			len(arrRemoveServiceControlPolicyIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsRemove{
+			err := c.DELETE(fmt.Sprintf("/v3/cloud-rule/%s/association", ID), hc.CloudRuleAssociationsRemove{
 				AzureArmTemplateDefinitionIds: &arrRemoveAzureArmTemplateDefinitionIds,
 				AzurePolicyDefinitionIds:      &arrRemoveAzurePolicyDefinitionIds,
 				AzureRoleDefinitionIds:        &arrRemoveAzureRoleDefinitionIds,
@@ -472,12 +472,12 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	if d.HasChanges("owner_user_groups",
 		"owner_users") {
 		hasChanged++
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_user_groups")
-		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, err := hc.AssociationChanged(d, "owner_users")
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, _ := hc.AssociationChanged(d, "owner_user_groups")
+		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, _ := hc.AssociationChanged(d, "owner_users")
 
 		if len(arrAddOwnerUserGroupIds) > 0 ||
 			len(arrAddOwnerUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/cloud-rule/%s/owner", ID), hc.ChangeOwners{
+			_, err := c.POST(fmt.Sprintf("/v3/cloud-rule/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
 				OwnerUserIds:      &arrAddOwnerUserIds,
 			})
@@ -493,7 +493,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 		if len(arrRemoveOwnerUserGroupIds) > 0 ||
 			len(arrRemoveOwnerUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/cloud-rule/%s/owner", ID), hc.ChangeOwners{
+			err := c.DELETE(fmt.Sprintf("/v3/cloud-rule/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
 				OwnerUserIds:      &arrAddOwnerUserIds,
 			})

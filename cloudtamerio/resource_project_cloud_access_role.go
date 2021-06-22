@@ -290,12 +290,12 @@ func resourceProjectCloudAccessRoleUpdate(ctx context.Context, d *schema.Resourc
 		"user_groups",
 		"users") {
 		hasChanged++
-		arrAddAccountIds, arrRemoveAccountIds, _, err := hc.AssociationChanged(d, "accounts")
-		arrAddAwsIamPermissionsBoundary, arrRemoveAwsIamPermissionsBoundary, _, err := hc.AssociationChangedInt(d, "aws_iam_permissions_boundary")
-		arrAddAwsIamPolicies, arrRemoveAwsIamPolicies, _, err := hc.AssociationChanged(d, "aws_iam_policies")
-		arrAddAzureRoleDefinitions, arrRemoveAzureRoleDefinitions, _, err := hc.AssociationChanged(d, "azure_role_definitions")
-		arrAddUserGroupIds, arrRemoveUserGroupIds, _, err := hc.AssociationChanged(d, "user_groups")
-		arrAddUserIds, arrRemoveUserIds, _, err := hc.AssociationChanged(d, "users")
+		arrAddAccountIds, arrRemoveAccountIds, _, _ := hc.AssociationChanged(d, "accounts")
+		arrAddAwsIamPermissionsBoundary, arrRemoveAwsIamPermissionsBoundary, _, _ := hc.AssociationChangedInt(d, "aws_iam_permissions_boundary")
+		arrAddAwsIamPolicies, arrRemoveAwsIamPolicies, _, _ := hc.AssociationChanged(d, "aws_iam_policies")
+		arrAddAzureRoleDefinitions, arrRemoveAzureRoleDefinitions, _, _ := hc.AssociationChanged(d, "azure_role_definitions")
+		arrAddUserGroupIds, arrRemoveUserGroupIds, _, _ := hc.AssociationChanged(d, "user_groups")
+		arrAddUserIds, arrRemoveUserIds, _, _ := hc.AssociationChanged(d, "users")
 
 		if len(arrAddAccountIds) > 0 ||
 			arrAddAwsIamPermissionsBoundary != nil ||
@@ -303,7 +303,7 @@ func resourceProjectCloudAccessRoleUpdate(ctx context.Context, d *schema.Resourc
 			len(arrAddAzureRoleDefinitions) > 0 ||
 			len(arrAddUserGroupIds) > 0 ||
 			len(arrAddUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/project-cloud-access-role/%s/association", ID), hc.ProjectCloudAccessRoleAssociationsAdd{
+			_, err := c.POST(fmt.Sprintf("/v3/project-cloud-access-role/%s/association", ID), hc.ProjectCloudAccessRoleAssociationsAdd{
 				AccountIds:                &arrAddAccountIds,
 				AwsIamPermissionsBoundary: arrAddAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrAddAwsIamPolicies,
@@ -327,7 +327,7 @@ func resourceProjectCloudAccessRoleUpdate(ctx context.Context, d *schema.Resourc
 			len(arrRemoveAzureRoleDefinitions) > 0 ||
 			len(arrRemoveUserGroupIds) > 0 ||
 			len(arrRemoveUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/project-cloud-access-role/%s/association", ID), hc.ProjectCloudAccessRoleAssociationsRemove{
+			err := c.DELETE(fmt.Sprintf("/v3/project-cloud-access-role/%s/association", ID), hc.ProjectCloudAccessRoleAssociationsRemove{
 				AccountIds:                &arrRemoveAccountIds,
 				AwsIamPermissionsBoundary: arrRemoveAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrRemoveAwsIamPolicies,

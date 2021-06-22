@@ -240,16 +240,16 @@ func resourceOUCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 		"user_groups",
 		"users") {
 		hasChanged++
-		arrAddAwsIamPermissionsBoundary, arrRemoveAwsIamPermissionsBoundary, _, err := hc.AssociationChangedInt(d, "aws_iam_permissions_boundary")
-		arrAddAwsIamPolicies, arrRemoveAwsIamPolicies, _, err := hc.AssociationChanged(d, "aws_iam_policies")
-		arrAddUserGroupIds, arrRemoveUserGroupIds, _, err := hc.AssociationChanged(d, "user_groups")
-		arrAddUserIds, arrRemoveUserIds, _, err := hc.AssociationChanged(d, "users")
+		arrAddAwsIamPermissionsBoundary, arrRemoveAwsIamPermissionsBoundary, _, _ := hc.AssociationChangedInt(d, "aws_iam_permissions_boundary")
+		arrAddAwsIamPolicies, arrRemoveAwsIamPolicies, _, _ := hc.AssociationChanged(d, "aws_iam_policies")
+		arrAddUserGroupIds, arrRemoveUserGroupIds, _, _ := hc.AssociationChanged(d, "user_groups")
+		arrAddUserIds, arrRemoveUserIds, _, _ := hc.AssociationChanged(d, "users")
 
 		if arrAddAwsIamPermissionsBoundary != nil ||
 			len(arrAddAwsIamPolicies) > 0 ||
 			len(arrAddUserGroupIds) > 0 ||
 			len(arrAddUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsAdd{
+			_, err := c.POST(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsAdd{
 				AwsIamPermissionsBoundary: arrAddAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrAddAwsIamPolicies,
 				UserGroupIds:              &arrAddUserGroupIds,
@@ -269,7 +269,7 @@ func resourceOUCloudAccessRoleUpdate(ctx context.Context, d *schema.ResourceData
 			len(arrRemoveAwsIamPolicies) > 0 ||
 			len(arrRemoveUserGroupIds) > 0 ||
 			len(arrRemoveUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsRemove{
+			err := c.DELETE(fmt.Sprintf("/v3/ou-cloud-access-role/%s/association", ID), hc.OUCloudAccessRoleAssociationsRemove{
 				AwsIamPermissionsBoundary: arrRemoveAwsIamPermissionsBoundary,
 				AwsIamPolicies:            &arrRemoveAwsIamPolicies,
 				UserGroupIds:              &arrRemoveUserGroupIds,
