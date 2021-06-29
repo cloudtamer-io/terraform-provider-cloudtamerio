@@ -209,10 +209,10 @@ func resourceComplianceStandardUpdate(ctx context.Context, d *schema.ResourceDat
 	// Handle associations.
 	if d.HasChanges("compliance_checks") {
 		hasChanged++
-		arrAddComplianceCheckIds, arrRemoveComplianceCheckIds, _, err := hc.AssociationChanged(d, "compliance_checks")
+		arrAddComplianceCheckIds, arrRemoveComplianceCheckIds, _, _ := hc.AssociationChanged(d, "compliance_checks")
 
 		if len(arrAddComplianceCheckIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/compliance/standard/%s/association", ID), hc.ComplianceStandardAssociationsAdd{
+			_, err := c.POST(fmt.Sprintf("/v3/compliance/standard/%s/association", ID), hc.ComplianceStandardAssociationsAdd{
 				ComplianceCheckIds: &arrAddComplianceCheckIds,
 			})
 			if err != nil {
@@ -226,7 +226,7 @@ func resourceComplianceStandardUpdate(ctx context.Context, d *schema.ResourceDat
 		}
 
 		if len(arrRemoveComplianceCheckIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/compliance/standard/%s/association", ID), hc.ComplianceStandardAssociationsRemove{
+			err := c.DELETE(fmt.Sprintf("/v3/compliance/standard/%s/association", ID), hc.ComplianceStandardAssociationsRemove{
 				ComplianceCheckIds: &arrRemoveComplianceCheckIds,
 			})
 			if err != nil {
@@ -244,12 +244,12 @@ func resourceComplianceStandardUpdate(ctx context.Context, d *schema.ResourceDat
 	if d.HasChanges("owner_user_groups",
 		"owner_users") {
 		hasChanged++
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_user_groups")
-		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, err := hc.AssociationChanged(d, "owner_users")
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, _ := hc.AssociationChanged(d, "owner_user_groups")
+		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, _ := hc.AssociationChanged(d, "owner_users")
 
 		if len(arrAddOwnerUserGroupIds) > 0 ||
 			len(arrAddOwnerUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/compliance/standard/%s/owner", ID), hc.ChangeOwners{
+			_, err := c.POST(fmt.Sprintf("/v3/compliance/standard/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
 				OwnerUserIds:      &arrAddOwnerUserIds,
 			})
@@ -265,7 +265,7 @@ func resourceComplianceStandardUpdate(ctx context.Context, d *schema.ResourceDat
 
 		if len(arrRemoveOwnerUserGroupIds) > 0 ||
 			len(arrRemoveOwnerUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/compliance/standard/%s/owner", ID), hc.ChangeOwners{
+			err := c.DELETE(fmt.Sprintf("/v3/compliance/standard/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
 				OwnerUserIds:      &arrAddOwnerUserIds,
 			})
