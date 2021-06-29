@@ -40,8 +40,9 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 						},
 					},
 				},
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "This field will be ignored if 'apply_to_all_accounts' is set to: true.",
 				// If apply_to_all_accounts is true, then ignore the accounts.
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("apply_to_all_accounts").(bool)
