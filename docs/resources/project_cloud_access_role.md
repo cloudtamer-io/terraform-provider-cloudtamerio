@@ -23,7 +23,7 @@ description: |-
 
 ### Optional
 
-- **accounts** (Block List) (see [below for nested schema](#nestedblock--accounts))
+- **accounts** (Block List) This field will be ignored if 'apply_to_all_accounts' is set to: true. (see [below for nested schema](#nestedblock--accounts))
 - **apply_to_all_accounts** (Boolean)
 - **aws_iam_path** (String)
 - **aws_iam_permissions_boundary** (Number)
