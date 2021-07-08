@@ -40,7 +40,7 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 						},
 					},
 				},
-				Type:        schema.TypeList,
+				Type:        schema.TypeList, // Don't let codegen remove this.
 				Optional:    true,
 				Description: "This field will be ignored if 'apply_to_all_accounts' is set to: true.",
 				// If apply_to_all_accounts is true, then ignore the accounts.
@@ -51,7 +51,7 @@ func resourceProjectCloudAccessRole() *schema.Resource {
 			"apply_to_all_accounts": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  false, // Don't let codegen remove this.
 			},
 			"aws_iam_path": {
 				Type:     schema.TypeString,

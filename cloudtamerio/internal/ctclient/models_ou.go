@@ -40,6 +40,7 @@ type OUCreate struct {
 
 // OUUpdatable for: PATCH /api/v3/ou/{id}
 type OUUpdatable struct {
-	Description string `json:"description"`
-	Name        string `json:"name"`
+	Description        string `json:"description"`
+	Name               string `json:"name"`
+	PermissionSchemeID int    `json:"permission_scheme_id"`
 }
