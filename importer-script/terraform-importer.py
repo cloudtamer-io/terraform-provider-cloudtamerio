@@ -71,7 +71,7 @@ PROVIDER_TEMPLATE = textwrap.dedent('''\
         required_providers {
             cloudtamerio = {
                 source  = "cloudtamer-io/cloudtamerio"
-                version = "0.1.2"
+                version = "0.1.3"
             }
         }
     }
