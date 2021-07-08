@@ -54,7 +54,6 @@ func resourceOU() *schema.Resource {
 				},
 				Type:     schema.TypeList,
 				Optional: true,
-				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"owner_users": {
 				Elem: &schema.Resource{
@@ -67,7 +66,6 @@ func resourceOU() *schema.Resource {
 				},
 				Type:     schema.TypeList,
 				Optional: true,
-				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"parent_ou_id": {
 				Type:     schema.TypeInt,
@@ -194,7 +192,7 @@ func resourceOUUpdate(ctx context.Context, d *schema.ResourceData, m interface{}
 	}
 
 	// Allow moving an OU if the parent ID changes and updating permissions.
-	diags, hasChanged = OUChanges(c, d, diags, hasChanged)
+	diags, hasChanged = OUChanges(c, d, diags, hasChanged) // Don't let codegen remove this.
 	if len(diags) > 0 {
 		return diags
 	}
@@ -211,7 +209,7 @@ func resourceOUDelete(ctx context.Context, d *schema.ResourceData, m interface{}
 	c := m.(*hc.Client)
 	ID := d.Id()
 
-	err := c.DELETE(fmt.Sprintf("/v2/ou/%s", ID), nil)
+	err := c.DELETE(fmt.Sprintf("/v2/ou/%s", ID), nil) // Don't let codegen remove this.
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
