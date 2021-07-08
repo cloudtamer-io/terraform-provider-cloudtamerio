@@ -39,10 +39,7 @@ func OUChanges(c *hc.Client, d *schema.ResourceData, diags diag.Diagnostics, has
 		"owner_user_group",
 		"owner_user") {
 		hasChanged++
-		arrPermissionSchemaId, arrRemovePermissionSchemaId, _, err := hc.AssociationChangedInt(d, "permission_scheme_id")
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_user_group")
-		arrAddOwnerUserId, arrRemoveOwnerUserId, _, err := hc.AssociationChanged(d, "owner_user")
-
+		arrPermissionSchemaID, arrRemovePermissionSchemaID, _, err := hc.AssociationChangedInt(d, "permission_scheme_id")
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -52,13 +49,33 @@ func OUChanges(c *hc.Client, d *schema.ResourceData, diags diag.Diagnostics, has
 			return diags, hasChanged
 		}
 
-		if arrPermissionSchemaId != nil ||
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_user_group")
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to add determining changeset for OrganizationalUnit",
+				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), d.Id()),
+			})
+			return diags, hasChanged
+		}
+
+		arrAddOwnerUserID, arrRemoveOwnerUserID, _, err := hc.AssociationChanged(d, "owner_user")
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to add determining changeset for OrganizationalUnit",
+				Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), d.Id()),
+			})
+			return diags, hasChanged
+		}
+
+		if arrPermissionSchemaID != nil ||
 			len(arrAddOwnerUserGroupIds) > 0 ||
 			len(arrRemoveOwnerUserGroupIds) > 0 ||
-			len(arrAddOwnerUserId) > 0 ||
-			len(arrRemoveOwnerUserId) > 0 {
+			len(arrAddOwnerUserID) > 0 ||
+			len(arrRemoveOwnerUserID) > 0 {
 			_, err = c.POST(fmt.Sprintf("/v3/ou/%s/permission-mapping", d.Id()), hc.OUPermissionAdd{
-				AppRoleID:         arrPermissionSchemaId,
+				AppRoleID:         arrPermissionSchemaID,
 				OwnerUserGroupIds: d.Get("owner_user").(*[]int),
 				OwnerUserIds:      d.Get("owner_user_group").(*[]int),
 			})
@@ -72,7 +89,7 @@ func OUChanges(c *hc.Client, d *schema.ResourceData, diags diag.Diagnostics, has
 			}
 		}
 
-		if arrRemovePermissionSchemaId != nil {
+		if arrRemovePermissionSchemaID != nil {
 			// TODO: Figure how to patch/delete permissions schema changes
 			err = nil
 			if err != nil {
