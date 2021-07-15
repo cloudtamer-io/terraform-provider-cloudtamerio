@@ -62,6 +62,10 @@ func dataSourceOU() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"permission_scheme_id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -94,6 +98,7 @@ func dataSourceOURead(ctx context.Context, d *schema.ResourceData, m interface{}
 		data["id"] = item.ID
 		data["name"] = item.Name
 		data["parent_ou_id"] = item.ParentOuID
+		data["permission_scheme_id"] = item.PermissionSchemeID
 
 		match, err := f.Match(data)
 		if err != nil {

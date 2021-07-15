@@ -70,12 +70,11 @@ func resourceOU() *schema.Resource {
 			"parent_ou_id": {
 				Type:     schema.TypeInt,
 				Required: true,
-				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
+				//ForceNew: true, // Don't let codegen change this.
 			},
 			"permission_scheme_id": {
 				Type:     schema.TypeInt,
 				Required: true,
-				//ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 		},
 	}
@@ -146,6 +145,7 @@ func resourceOURead(ctx context.Context, d *schema.ResourceData, m interface{}) 
 		data["owner_users"] = hc.InflateObjectWithID(item.OwnerUsers)
 	}
 	data["parent_ou_id"] = item.OU.ParentOuID
+	data["permission_scheme_id"] = item.OU.PermissionSchemeID
 
 	for k, v := range data {
 		if err := d.Set(k, v); err != nil {
@@ -173,11 +173,13 @@ func resourceOUUpdate(ctx context.Context, d *schema.ResourceData, m interface{}
 	// `aws_iam_path` in AWS IAM policies and add `ForceNew: true` to the
 	// schema instead.
 	if d.HasChanges("description",
-		"name") {
+		"name",
+		"permission_scheme_id") {
 		hasChanged++
 		req := hc.OUUpdatable{
-			Description: d.Get("description").(string),
-			Name:        d.Get("name").(string),
+			Description:        d.Get("description").(string),
+			Name:               d.Get("name").(string),
+			PermissionSchemeID: d.Get("permission_scheme_id").(int),
 		}
 
 		err := c.PATCH(fmt.Sprintf("/v3/ou/%s", ID), req)
@@ -192,9 +194,50 @@ func resourceOUUpdate(ctx context.Context, d *schema.ResourceData, m interface{}
 	}
 
 	// Allow moving an OU if the parent ID changes and updating permissions.
-	diags, hasChanged = OUChanges(c, d, diags, hasChanged) // Don't let codegen remove this.
+	// Don't let codegen remove this.
+	diags, hasChanged = OUChanges(c, d, diags, hasChanged)
 	if len(diags) > 0 {
 		return diags
+	}
+
+	// Determine if the owners have changed.
+	if d.HasChanges("owner_user_groups",
+		"owner_users") {
+		hasChanged++
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, _ := hc.AssociationChanged(d, "owner_user_groups")
+		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, _ := hc.AssociationChanged(d, "owner_users")
+
+		if len(arrAddOwnerUserGroupIds) > 0 ||
+			len(arrAddOwnerUserIds) > 0 {
+			_, err := c.POST(fmt.Sprintf("/v3/ou/%s/owner", ID), hc.ChangeOwners{
+				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
+				OwnerUserIds:      &arrAddOwnerUserIds,
+			})
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Unable to add owners on OU",
+					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+				})
+				return diags
+			}
+		}
+
+		if len(arrRemoveOwnerUserGroupIds) > 0 ||
+			len(arrRemoveOwnerUserIds) > 0 {
+			err := c.DELETE(fmt.Sprintf("/v3/ou/%s/owner", ID), hc.ChangeOwners{
+				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
+				OwnerUserIds:      &arrAddOwnerUserIds,
+			})
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Unable to remove owners on OU",
+					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+				})
+				return diags
+			}
+		}
 	}
 
 	if hasChanged > 0 {
@@ -209,7 +252,7 @@ func resourceOUDelete(ctx context.Context, d *schema.ResourceData, m interface{}
 	c := m.(*hc.Client)
 	ID := d.Id()
 
-	err := c.DELETE(fmt.Sprintf("/v2/ou/%s", ID), nil) // Don't let codegen remove this.
+	err := c.DELETE(fmt.Sprintf("/v2/ou/%s", ID), nil)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

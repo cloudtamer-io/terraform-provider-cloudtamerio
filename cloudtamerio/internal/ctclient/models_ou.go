@@ -3,11 +3,12 @@ package ctclient
 // OUListResponse for: GET /api/v3/ou
 type OUListResponse struct {
 	Data []struct {
-		CreatedAt   string `json:"created_at"`
-		Description string `json:"description"`
-		ID          int    `json:"id"`
-		Name        string `json:"name"`
-		ParentOuID  int    `json:"parent_ou_id"`
+		CreatedAt          string `json:"created_at"`
+		Description        string `json:"description"`
+		ID                 int    `json:"id"`
+		Name               string `json:"name"`
+		ParentOuID         int    `json:"parent_ou_id"`
+		PermissionSchemeID int    `json:"permission_scheme_id"`
 	} `json:"data"`
 	Status int `json:"status"`
 }
@@ -16,11 +17,12 @@ type OUListResponse struct {
 type OUResponse struct {
 	Data struct {
 		OU struct {
-			CreatedAt   string `json:"created_at"`
-			Description string `json:"description"`
-			ID          int    `json:"id"`
-			Name        string `json:"name"`
-			ParentOuID  int    `json:"parent_ou_id"`
+			CreatedAt          string `json:"created_at"`
+			Description        string `json:"description"`
+			ID                 int    `json:"id"`
+			Name               string `json:"name"`
+			ParentOuID         int    `json:"parent_ou_id"`
+			PermissionSchemeID int    `json:"permission_scheme_id"`
 		} `json:"ou"`
 		OwnerUserGroups []ObjectWithID `json:"owner_user_groups"`
 		OwnerUsers      []ObjectWithID `json:"owner_users"`
