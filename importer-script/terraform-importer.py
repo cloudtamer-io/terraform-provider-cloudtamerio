@@ -1669,6 +1669,9 @@ def api_call(url, timeout=30, test=False):
         return False
     else:
 
+        # at this point, no exceptions were thrown so the
+        # the request succeeded
+
         # check if test is True, if so return True
         if test:
             return True
