@@ -14,6 +14,7 @@ import json
 import textwrap
 import argparse
 import requests
+from json.decoder import JSONDecodeError
 
 PARSER = argparse.ArgumentParser(description='Import Cloud Resources into the Repo Module')
 PARSER.add_argument('--ct-url', type=str, required=True, help='URL to cloudtamer, without trailing slash. Example: https://cloudtamer.myorg.com')
@@ -1551,10 +1552,8 @@ def write_file(file_name, content):
 
     # only proceed if filename doesn't exist yet or the overwrite flag was set
     if not os.path.exists(file_name) or ARGS.overwrite:
-
-        with open(file_name, 'w') as outfile:
+        with open(file_name, 'w', encoding='utf8') as outfile:
             outfile.write(content)
-
     #else:
         #print("Found %s already. Will not overwrite." % file_name)
 
@@ -1575,7 +1574,7 @@ def read_file(file, content_type):
         success - content of file
         failure - False
       """
-    with open(file, "r") as f:
+    with open(file, "r", encoding='utf8') as f:
         if content_type == "json":
             # validate that the file contains json
             try:
@@ -1605,7 +1604,7 @@ def write_provider_file(file_name, content):
     if os.path.exists(file_name):
         file_name = "%s.example" % file_name
 
-    with open(file_name, 'w') as outfile:
+    with open(file_name, 'w', encoding='utf8') as outfile:
         outfile.write(content)
 
     return True
@@ -1623,7 +1622,7 @@ def write_resource_import_script(args, imported_resources):
     """
 
     file_name = "%s/import_resource_state.sh" % args.import_dir
-    with open(file_name, 'w') as outfile:
+    with open(file_name, 'w', encoding='utf8') as outfile:
         outfile.write("#!/bin/bash\n")
         for line in IMPORTED_RESOURCES:
             outfile.write("terraform import %s\n" % line)
@@ -1631,7 +1630,7 @@ def write_resource_import_script(args, imported_resources):
     return True
 
 
-def api_call(url, timeout=10):
+def api_call(url, timeout=30, test=False):
     """
     API Call
 
@@ -1639,8 +1638,10 @@ def api_call(url, timeout=10):
     They are all GET requests.
 
     Params:
-        url (str) - full URL to call
-        timeout (int) - timeout for the call, defaults to 10
+        url         (str)   - full URL to call
+        timeout     (int)   - timeout for the call, defaults to 10
+        test        (bool)  - if true, just test success of response and return
+                              True / False accordingly, rather than returning the response data
 
     Return:
         success - response['data']
@@ -1653,30 +1654,43 @@ def api_call(url, timeout=10):
         verify = True
 
     try:
-        response = requests.get(url=url, headers=HEADERS, timeout=timeout, verify=verify).json()
-    except:
+        response = requests.get(url=url, headers=HEADERS, timeout=timeout, verify=verify)
+    except requests.exceptions.Timeout:
+        print("Connection to %s timed out. Timeout set to: %s" % (url, timeout))
         return False
-    # except requests.exceptions.Timeout:
-    # except requests.exceptions.TooManyRedirects:
-    # except requests.exceptions.RequestException as e:
-    #     raise SystemExit(e)
+    except requests.exceptions.TooManyRedirects as e:
+        print("Connection to %s returned Too Many Redirects error: %s" % (url, e))
+        return False
+    except requests.exceptions.RequestException as e:
+        print("Connection to %s resulted in error: %s" % (url, e))
+        return False
+    except Exception as e:
+        print("Exception occurred during connection to %s: %s" % (url, e))
+        return False
     else:
-        # the request succeeded, test the response
-        if response['status'] == 200:
 
+        # at this point, no exceptions were thrown so the
+        # the request succeeded
+
+        # check if test is True, if so return True
+        if test:
+            return True
+
+        # test for valid json response
+        try:
+            response.json()
+        except JSONDecodeError as e:
+            print("JSON decode error on response: %s, %s" % (response, e))
+            return False
+        else:
+            response = response.json()
+
+        if response['status'] == 200:
             # reset the unauth retry counter
             global UNAUTH_RETRY_COUNTER
             UNAUTH_RETRY_COUNTER = 0
-
-            # if not response['data']:
-            #     print("got false data")
-            #     print(response)
-            #     print(type(response))
-            #     print(url)
-
             return response['data']
         elif response['status'] == 401:
-            # print("unauth, count = %s, max = %s" % (UNAUTH_RETRY_COUNTER, MAX_UNAUTH_RETRIES))
             # retry up to MAX_UNAUTH_RETRIES
             if UNAUTH_RETRY_COUNTER < MAX_UNAUTH_RETRIES:
                 retries = MAX_UNAUTH_RETRIES - UNAUTH_RETRY_COUNTER
@@ -1689,7 +1703,7 @@ def api_call(url, timeout=10):
         else:
             print(response['status'])
             print("Error calling API: %s\n%s" % (url, response))
-            return False
+        return False
 
 
 def validate_connection(url):
@@ -1705,12 +1719,11 @@ def validate_connection(url):
         success - True
         failure - sys.exit
     """
-    try:
-        requests.get(url=url, headers=HEADERS, timeout=3)
-    except:
-        sys.exit("Unable to connect to %s" % url)
-    else:
+
+    if api_call(url, 30, True):
         return True
+    else:
+        sys.exit("Unable to connect to %s" % url)
 
 
 def validate_import_dir(path):
