@@ -47,5 +47,6 @@ Read-only:
 - **id** (Number)
 - **name** (String)
 - **parent_ou_id** (Number)
+- **permission_scheme_id** (Number)
 
 
