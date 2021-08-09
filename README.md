@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.3"
+      version = "0.1.4"
     }
   }
 }
@@ -294,6 +294,23 @@ resource "cloudtamerio_ou_cloud_access_role" "carou1" {
 # Output the ID of the resource created.
 output "ou_car_id" {
   value = cloudtamerio_ou_cloud_access_role.carou1.id
+}
+```
+
+```hcl
+# Create an OU.
+resource "cloudtamerio_ou" "ou1" {
+  name         = "sample-ou"
+  description  = "Sample OU."
+  parent_ou_id = 0
+  permission_scheme_id = 2
+  owner_users { id = 1 }
+  owner_user_groups { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "ou_id" {
+  value = cloudtamerio_ou.ou1.id
 }
 ```
 
