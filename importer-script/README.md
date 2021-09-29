@@ -279,7 +279,6 @@ purpose in importing them into the Terraform state since they cannot be managed.
 You may want to import then to easily find their IDs
 for referencing in other resources, or just for reviewing their content.
 
-
 ```bash
 $ python3 terraform-importer --import-ct-managed
 ```
