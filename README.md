@@ -140,9 +140,9 @@ resource "cloudtamerio_aws_cloudformation_template" "t1" {
   name    = "sample-resource"
   regions = ["us-east-1"]
   # description = "Creates a test IAM role."
-  # region                 = ""   
-  # sns_arns               = ""   
-  # template_parameters    = ""   
+  # region                 = ""
+  # sns_arns               = ""
+  # template_parameters    = ""
   # termination_protection = false
   owner_users { id = 1 }
   owner_user_groups { id = 1 }
