@@ -29,6 +29,8 @@ PARSER.add_argument('--skip-checks', action='store_true', help='Skip importing C
 PARSER.add_argument('--skip-standards', action='store_true', help='Skip importing Compliance Standards.')
 PARSER.add_argument('--skip-ssl-verify', action='store_true',help='Skip SSL verification. Use if cloudtamer.io does not have a valid SSL certificate.')
 PARSER.add_argument('--overwrite', action='store_true',help='Overwrite existing files during import.')
+PARSER.add_argument('--import-ct-managed', action='store_true',help='Import cloudtamer-managed resources.')
+PARSER.add_argument('--import-aws-managed', action='store_true',help='Import AWS-managed resources (only those that were already imported into cloudtamer).')
 PARSER.add_argument('--prepend-id', action='store_true',help='Prepend each resource\'s ID to its filenames. Useful for easily correlating IDs to resources')
 # PARSER.add_argument('--dry-run', action='store_true', help='Perform a dry run without writing any files.')
 # PARSER.add_argument('--sync', action='store_true',help='Sync repository resources into cloudtamer.')
@@ -216,20 +218,19 @@ def import_cfts():
         IMPORTED_MODULES.append("aws-cloudformation-template")
 
         for c in CFTs:
-
             # init new cft object
             cft = {}
-            c_id = c['cft']['id']
-            cft['name'] = process_string(c['cft']['name'])
-            cft['description'] = process_string(c['cft']['description'])
-            cft['regions'] = json.dumps(c['cft']['regions'])
-            cft['region'] = c['cft']['region']
-            cft['sns_arns'] = process_string(c['cft']['sns_arns'])
-            cft['template_parameters'] = c['cft']['template_parameters'].rstrip()
-            cft['termination_protection'] = c['cft']['termination_protection']
-            cft['owner_user_ids'] = []
-            cft['owner_user_group_ids'] = []
-            cft['policy'] = c['cft']['policy'].rstrip()
+            c_id                            = c['cft']['id']
+            cft['name']                     = process_string(c['cft']['name'])
+            cft['description']              = process_string(c['cft']['description'])
+            cft['regions']                  = json.dumps(c['cft']['regions'])
+            cft['region']                   = c['cft']['region']
+            cft['sns_arns']                 = process_string(c['cft']['sns_arns'])
+            cft['template_parameters']      = c['cft']['template_parameters'].rstrip()
+            cft['termination_protection']   = c['cft']['termination_protection']
+            cft['owner_user_ids']           = []
+            cft['owner_user_group_ids']     = []
+            cft['policy']                   = c['cft']['policy'].rstrip()
 
             print("Importing CFT - %s" % cft['name'])
 
@@ -296,7 +297,7 @@ def import_cfts():
                 policy=cft['policy']
             )
 
-            # do some post-processing of the rendered template prior to 
+            # do some post-processing of the rendered template prior to
             # writing it out
             if not c['cft']['template_parameters']:
                 content = re.sub('\s*template_parameters = <<-EOT\n\nEOT', '', content)
@@ -347,23 +348,31 @@ def import_iams():
         IMPORTED_MODULES.append("aws-iam-policy")
 
         for i in IAMs:
+            aws_managed     = False
+            ct_managed      = False
 
             if i['iam_policy']['aws_managed_policy']:
-                print("Skipping AWS-managed IAM Policy: %s" % i['iam_policy']['name'])
-                continue
+                if not ARGS.import_aws_managed:
+                    print("Skipping AWS-managed IAM Policy: %s" % i['iam_policy']['name'])
+                    continue
+                else:
+                    aws_managed = True
 
             if i['iam_policy']['system_managed_policy']:
-                print("Skipping System-managed IAM Policy: %s" % i['iam_policy']['name'])
-                continue
+                if not ARGS.import_ct_managed:
+                    print("Skipping System-managed IAM Policy: %s" % i['iam_policy']['name'])
+                    continue
+                else:
+                    ct_managed = True
 
             # init new IAM object
             iam = {}
-            i_id = i['iam_policy']['id']
-            iam['name'] = process_string(i['iam_policy']['name'])
-            iam['description'] = process_string(i['iam_policy']['description'])
-            iam['owner_user_ids'] = []
+            i_id                        = i['iam_policy']['id']
+            iam['name']                 = process_string(i['iam_policy']['name'])
+            iam['description']          = process_string(i['iam_policy']['description'])
+            iam['owner_user_ids']       = []
             iam['owner_user_group_ids'] = []
-            iam['policy'] = i['iam_policy']['policy'].rstrip()
+            iam['policy']               = i['iam_policy']['policy'].rstrip()
 
             print("Importing IAM Policy - %s" % iam['name'])
 
@@ -410,19 +419,23 @@ def import_iams():
                 policy=iam['policy']
             )
 
-            # build the file name
-            if ARGS.prepend_id:
-                base_filename = normalize_string(iam['name'], i_id)
+            # build the base file name
+            base_filename = build_filename(iam['name'], aws_managed, ct_managed, ARGS.prepend_id, i_id)
+
+            # if it is not an AWS managed and not a CT managed resource, then set a standard filename
+            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
+            # don't add it to the list of imported resources
+            if not aws_managed and not ct_managed:
+                filename = "%s/aws-iam-policy/%s.tf" % (ARGS.import_dir, base_filename)
+
+                # add to IMPORTED_RESOURCES
+                resource = "module.aws-iam-policy.%s_aws_iam_policy.%s %s" % (RESOURCE_PREFIX, normalize_string(iam['name']), i_id)
+                IMPORTED_RESOURCES.append(resource)
             else:
-                base_filename = normalize_string(iam['name'])
+                filename = "%s/aws-iam-policy/%s.tf.skip" % (ARGS.import_dir, base_filename)
 
-            filename = "%s/aws-iam-policy/%s.tf" % (ARGS.import_dir, base_filename)
-
+            # write the file
             write_file(filename, process_template(content))
-
-            # add to IMPORTED_RESOURCES
-            resource = "module.aws-iam-policy.%s_aws_iam_policy.%s %s" % (RESOURCE_PREFIX, normalize_string(iam['name']), i_id)
-            IMPORTED_RESOURCES.append(resource)
 
         # now out of the loop, write the provider.tf file
         provider_filename = "%s/aws-iam-policy/provider.tf" % ARGS.import_dir
@@ -784,11 +797,15 @@ def import_cloud_rules():
 
         # now loop over them and get the CFT and IAM policy associations
         for c in cloud_rules:
+            ct_managed = False
 
-            # skip the built_in rules
+            # skip the built_in rules unless toggled on
             if c['built_in']:
-                print("Skipping built-in Cloud Rule: %s" % c['name'])
-                continue
+                if not ARGS.import_ct_managed:
+                    print("Skipping built-in Cloud Rule: %s" % c['name'])
+                    continue
+                else:
+                    ct_managed = True
 
             print("Importing Cloud Rule - %s" % c['name'])
 
@@ -866,19 +883,22 @@ def import_cloud_rules():
                 owner_groups='\n    '.join(owner_groups),
             )
 
-            # construct the metadata file name
-            if ARGS.prepend_id:
-                base_filename = normalize_string(c['name'], c['id'])
-            else:
-                base_filename = normalize_string(c['name'])
+            # build the base file name
+            base_filename = build_filename(c['name'], False, ct_managed, ARGS.prepend_id, c['id'])
 
-            filename = "%s/cloud-rule/%s.tf" % (ARGS.import_dir, base_filename)
+            # if it is not a CT managed resource, then set a standard filename
+            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
+            # don't add it to the list of imported resources
+            if not ct_managed:
+                filename = "%s/cloud-rule/%s.tf" % (ARGS.import_dir, base_filename)
+
+                # add to IMPORTED_RESOURCES
+                resource = "module.cloud-rule.%s_cloud_rule.%s %s" % (RESOURCE_PREFIX, normalize_string(c['name']), c['id'])
+                IMPORTED_RESOURCES.append(resource)
+            else:
+                filename = "%s/cloud-rule/%s.tf.skip" % (ARGS.import_dir, base_filename)
 
             write_file(filename, process_template(content))
-
-            # add to IMPORTED_RESOURCES
-            resource = "module.cloud-rule.%s_cloud_rule.%s %s" % (RESOURCE_PREFIX, normalize_string(c['name']), c['id'])
-            IMPORTED_RESOURCES.append(resource)
 
         # now out of the loop, write the provider.tf file
         provider_filename = "%s/cloud-rule/provider.tf" % ARGS.import_dir
@@ -909,10 +929,15 @@ def import_compliance_checks():
         IMPORTED_MODULES.append("compliance-check")
 
         for c in CHECKS:
-            # skip cloudtamer managed checks
+            ct_managed = False
+
+            # skip cloudtamer managed checks unless toggled on
             if c['ct_managed']:
-                print("Skipping built-in Compliance Check - %s" % c['name'])
-                continue
+                if not ARGS.import_ct_managed:
+                    print("Skipping System-managed Compliance Check - %s" % c['name'])
+                    continue
+                else:
+                    ct_managed = True
 
             print("Importing Compliance Check - %s" % c['name'])
 
@@ -1198,19 +1223,22 @@ def import_compliance_checks():
             if check['compliance_check_type_id'] == 1 or check['compliance_check_type_id'] == 4:
                 content = re.sub(r'\s*body = <<-EOT\n\nEOT', '', content, re.MULTILINE)
 
-            # build the file names
-            if ARGS.prepend_id:
-                base_filename = normalize_string(check['name'], c['id'])
-            else:
-                base_filename = normalize_string(check['name'])
+            # build the base file name
+            base_filename = build_filename(check['name'], False, ct_managed, ARGS.prepend_id, c['id'])
 
-            filename = "%s/compliance-check/%s.tf" % (ARGS.import_dir, base_filename)
+            # if it is not a CT managed resource, then set a standard filename
+            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
+            # don't add it to the list of imported resources
+            if not ct_managed:
+                filename = "%s/compliance-check/%s.tf" % (ARGS.import_dir, base_filename)
+
+                # add to IMPORTED_RESOURCES
+                resource = "module.compliance-check.%s_compliance_check.%s %s" % (RESOURCE_PREFIX, normalize_string(check['name']), c['id'])
+                IMPORTED_RESOURCES.append(resource)
+            else:
+                filename = "%s/compliance-check/%s.tf.skip" % (ARGS.import_dir, base_filename)
 
             write_file(filename, process_template(content))
-
-            # add to IMPORTED_RESOURCES
-            resource = "module.compliance-check.%s_compliance_check.%s %s" % (RESOURCE_PREFIX, normalize_string(check['name']), c['id'])
-            IMPORTED_RESOURCES.append(resource)
 
         # now out of the loop, write the provider.tf file
         provider_filename = "%s/compliance-check/provider.tf" % ARGS.import_dir
@@ -1241,22 +1269,26 @@ def import_compliance_standards():
         IMPORTED_MODULES.append("compliance-standard")
 
         for s in STANDARDS:
+            ct_managed = False
 
-            # skip cloudtamer managed checks
-            if s['ct_managed']:
-                print("Skipping built-in Compliance Standard - %s" % s['name'])
-                continue
+            # skip cloudtamer managed checks unless toggled on
+            if s['ct_managed'] or s['created_by_user_id'] == 0:
+                if not ARGS.import_ct_managed:
+                    print("Skipping built-in Compliance Standard - %s" % s['name'])
+                    continue
+                else:
+                    ct_managed = True
 
             print("Importing Compliance Standard - %s" % s['name'])
 
             # init new object
             standard = {}
-            standard['name'] = process_string(s['name'])
-            standard['checks'] = []
-            standard['owner_user_ids'] = []
-            standard['owner_user_group_ids'] = []
-            standard['description'] = ''
-            standard['created_by_user_id'] = ''
+            standard['name']                    = process_string(s['name'])
+            standard['checks']                  = []
+            standard['owner_user_ids']          = []
+            standard['owner_user_group_ids']    = []
+            standard['description']             = ''
+            standard['created_by_user_id']      = ''
 
             # we need to make an additional call to get attached checks, owner users and groups
             url = "%s/v3/compliance/standard/%s" % (BASE_URL, s['id'])
@@ -1314,19 +1346,22 @@ def import_compliance_standards():
                 compliance_checks=process_list(standard['checks'], "compliance_checks")
             )
 
-            # build the file names
-            if ARGS.prepend_id:
-                base_filename = normalize_string(standard['name'], s['id'])
-            else:
-                base_filename = normalize_string(standard['name'])
+            # build the file name
+            base_filename = build_filename(standard['name'], False, ct_managed, ARGS.prepend_id, s['id'])
 
-            filename = "%s/compliance-standard/%s.tf" % (ARGS.import_dir, base_filename)
+            # if it is not a CT managed resource, then set a standard filename
+            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
+            # don't add it to the list of imported resources
+            if not ct_managed:
+                filename = "%s/compliance-standard/%s.tf" % (ARGS.import_dir, base_filename)
+
+                # add to IMPORTED_RESOURCES
+                resource = "module.compliance-standard.%s_compliance_standard.%s %s" % (RESOURCE_PREFIX, normalize_string(standard['name']), s['id'])
+                IMPORTED_RESOURCES.append(resource)
+            else:
+                filename = "%s/compliance-standard/%s.tf.skip" % (ARGS.import_dir, base_filename)
 
             write_file(filename, process_template(content))
-
-            # add to IMPORTED_RESOURCES
-            resource = "module.compliance-standard.%s_compliance_standard.%s %s" % (RESOURCE_PREFIX, normalize_string(standard['name']), s['id'])
-            IMPORTED_RESOURCES.append(resource)
 
         # now out of the loop, write the provider.tf file
         provider_filename = "%s/compliance-standard/provider.tf" % ARGS.import_dir
@@ -1609,6 +1644,7 @@ def write_provider_file(file_name, content):
 
     return True
 
+
 def write_resource_import_script(args, imported_resources):
     """
     Write Resource Import Script
@@ -1832,6 +1868,7 @@ def process_list(input, text):
 
     return '\n    '.join(output)
 
+
 def process_string(input):
     """
     Helper function to handle routine string processing
@@ -1858,6 +1895,39 @@ def process_template(input):
     output = re.sub(r'\s*\w+\s+{\s+}', r'', input)
     # output = re.sub('    $', '', output, re.MULTILINE)
     return output
+
+
+def build_filename(base: str, aws_managed=False, ct_managed=False, prepend_id=False, r_id=False):
+    """
+    Helper funcion to build the filename based on provided parameters
+
+    Params:
+        base        (str)   - base name of the file
+        aws_managed (bool)  - whether or not this is an AWS-managed resource
+        ct_managed  (bool)  - whether or not this is a CT-managed resource
+        prepend_id  (bool)  - whether or not to prepend the resource ID to the name
+        r_id        (str)   - the resource's ID to prepend, if prepend_id is True
+
+    Returns:
+        base_filename   (str)   - formatted base filename
+    """
+    base_filename = base
+
+    if aws_managed:
+        base_filename = "AWS_Managed_%s" % base_filename
+    elif ct_managed:
+        base_filename = "CT_Managed_%s" % base_filename
+
+    if ARGS.prepend_id:
+        if r_id:
+            base_filename = normalize_string(base_filename, r_id)
+        else:
+            print("Error - prepend ID was set to true but the ID was not provided. Will return without the ID prepended.")
+            base_filename = normalize_string(base_filename)
+    else:
+        base_filename = normalize_string(base_filename)
+
+    return base_filename
 
 
 if __name__ == "__main__":
