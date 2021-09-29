@@ -266,6 +266,41 @@ Example usage:
 $ python3 terraform-importer --skip-ssl-verify
 ```
 
+### `--import-ct-managed`
+
+Import cloudtamer-managed resources.
+
+These resources cannot be changed or deleted, and so they will have `.skip` appended to their filenames
+to make Terraform ignore them. This is done so that Terraform will not try to manage them.
+
+They will also not be listed in the `import_resource_state.sh` bash script as there is no
+purpose in importing them into the Terraform state since they cannot be managed.
+
+You may want to import then to easily find their IDs
+for referencing in other resources, or just for reviewing their content.
+
+
+```bash
+$ python3 terraform-importer --import-ct-managed
+```
+
+### `--import-aws-managed`
+
+Import AWS-managed resources that are already present in cloudtamer.
+
+These resources cannot be changed or deleted, and so they will have `.skip` appended to their filenames
+to make Terraform ignore them. This is done so that Terraform will not try to manage them.
+
+They will also not be listed in the `import_resource_state.sh` bash script as there is no
+purpose in importing them into the Terraform state since they cannot be managed.
+
+You may want to import then to easily find their IDs
+for referencing in other resources, or just for reviewing their content.
+
+```bash
+$ python3 terraform-importer --import-aws-managed
+```
+
 ### `--overwrite`
 
 Overwrite existing files during the import.
