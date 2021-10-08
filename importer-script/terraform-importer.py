@@ -2109,7 +2109,7 @@ def clone_resource(resource_type, resource):
 
     elif search is False:
         # False means an error occurred
-        return False, "error occurred searching for resource"
+        return False, False
     elif isinstance(search, dict):
         # if we got a dict back, it means a matching resource was found
         # we dont need to return this back as the caller already has it
