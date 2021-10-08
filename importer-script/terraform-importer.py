@@ -24,7 +24,7 @@ PARSER.add_argument('--skip-cfts', action='store_true', help='Skip importing AWS
 PARSER.add_argument('--skip-iams', action='store_true', help='Skip importing AWS IAM policies.')
 # PARSER.add_argument('--skip-arms', action='store_true', help='Skip importing Azure ARM templates.')
 PARSER.add_argument('--skip-azure-policies', action='store_true', help='Skip importing Azure Policies.')
-# PARSER.add_argument('--skip-azure-roles', action='store_true', help='Skip importing Azure Roles.')
+PARSER.add_argument('--skip-azure-roles', action='store_true', help='Skip importing Azure Roles.')
 PARSER.add_argument('--skip-project-roles', action='store_true', help='Skip importing Project Cloud Access Roles.')
 PARSER.add_argument('--skip-ou-roles', action='store_true', help='Skip importing OU Cloud Access Roles.')
 PARSER.add_argument('--skip-cloud-rules', action='store_true', help='Skip importing Cloud Rules.')
@@ -32,10 +32,10 @@ PARSER.add_argument('--skip-checks', action='store_true', help='Skip importing C
 PARSER.add_argument('--skip-standards', action='store_true', help='Skip importing Compliance Standards.')
 PARSER.add_argument('--skip-ssl-verify', action='store_true', help='Skip SSL verification. Use if cloudtamer.io does not have a valid SSL certificate.')
 PARSER.add_argument('--overwrite', action='store_true', help='Overwrite existing files during import.')
-PARSER.add_argument('--import-system-managed', action='store_true', help='Import clones of system-managed resources. Names of clones will be prefixed using --clone-prefix argument.')
 PARSER.add_argument('--import-aws-managed', action='store_true', help='Import AWS-managed resources (only those that were already imported into cloudtamer).')
 PARSER.add_argument('--prepend-id', action='store_true', help='Prepend each resource\'s ID to its filenames. Useful for easily correlating IDs to resources')
-PARSER.add_argument('--clone-prefix', type=str, help='A prefix for the name of cloned system-managed resources. Use with --import-system-managed. Default is "CLONE_"')
+PARSER.add_argument('--clone-system-managed', action='store_true', help='Clone system-managed resources. Names of clones will be prefixed using --clone-prefix argument. Ownership of clones will be set with --clone-user-ids and/or --clone-user-group-ids')
+PARSER.add_argument('--clone-prefix', type=str, help='A prefix for the name of cloned system-managed resources. Use with --clone-system-managed.')
 PARSER.add_argument('--clone-user-ids', nargs='+', type=int, help='Space separated user IDs to set as owner users for cloned resources')
 PARSER.add_argument('--clone-user-group-ids', nargs='+', type=int, help='Space separated user group IDs to set as owner user groups for cloned resources')
 
@@ -67,23 +67,24 @@ if not ARGS.ct_api_key:
     else:
         sys.exit("Did not find a cloudtamer API key supplied via CLI argument or environment variable (CLOUDTAMERIO_APIKEY or CT_API_KEY).")
 
-# validate clone_prefix
-if ARGS.import_system_managed:
-  if not ARGS.clone_prefix:
-    print("Setting clone prefix to CLONE_")
-    ARGS.clone_prefix = "CLONE_"
-  else:
-    if '_' not in ARGS.clone_prefix and '-' not in ARGS.clone_prefix:
-      sys.exit("Did not find a _ or - in clone prefix.")
+# validate flags related to cloning
+if ARGS.clone_system_managed:
 
-  # while we're here, validate clone-user-ids and clone-user-group-ids
-  if not ARGS.clone_user_ids and not ARGS.clone_user_group_ids:
-    sys.exit("You must specify either --clone-user-ids and / or --clone-user-group-ids in order to import system-managed resources.")
-  else:
-    if not ARGS.clone_user_ids:
-      ARGS.clone_user_ids = []
-    if not ARGS.clone_user_group_ids:
-      ARGS.clone_user_group_ids = []
+    # validate clone prefix
+    if not ARGS.clone_prefix:
+        sys.exit("You did not provide a clone prefix value using the --clone-prefix flag.")
+    else:
+        if not ARGS.clone_prefix.endswith('-') and not ARGS.clone_prefix.endswith("_"):
+            sys.exit("Did not find a _ or - in clone prefix.")
+
+    # validate clone-user-ids and clone-user-group-ids
+    if not ARGS.clone_user_ids and not ARGS.clone_user_group_ids:
+        sys.exit("You must provide at least one of --clone-user-ids or --clone-user-group-ids in order to import system-managed resources.")
+    else:
+        if not ARGS.clone_user_ids:
+            ARGS.clone_user_ids = []
+        if not ARGS.clone_user_group_ids:
+            ARGS.clone_user_group_ids = []
 
 BASE_URL = "%s/api" % ARGS.ct_url
 HEADERS = {"accept": "application/json", "Authorization": "Bearer " + ARGS.ct_api_key}
@@ -149,19 +150,62 @@ OUTPUT_TEMPLATE = textwrap.dedent('''\
 # this maps the various object types that can be attached to cloud rules
 # to the API endpoint for that resource type
 OBJECT_API_MAP = {
-    'aws_cloudformation_templates': 'v3/cft',
-    'aws_iam_policies': 'v3/iam-policy',
-    'azure_arm_template_definitions': 'v4/azure-arm-template',
-    'azure_policy_definitions': 'v3/azure-policy',
-    'azure_role_definitions': 'v3/azure-role',
-    'compliance_standards': 'v3/compliance/standard',
-    'internal_aws_amis': 'v3/ami',
-    'internal_aws_service_catalog_portfolios': 'v3/service-catalog',
-    'ous': 'v3/ou',
-    'owner_user_groups': 'v3/user-group',
-    'owner_users': 'v3/user',
-    'service_control_policies': 'v3/service-control-policy',
-    'cloud_rules': 'v3/cloud-rule'
+    'aws_cloudformation_templates': {
+        'GET': 'v3/cft',
+        'POST': 'v3/cft'
+    },
+    'aws_iam_policies': {
+        'GET': 'v3/iam-policy',
+        'POST': 'v3/iam-policy'
+    },
+    'azure_arm_template_definitions': {
+        'GET': 'v4/azure-arm-template',
+        'POST': 'v3/azure-arm-template'
+    },
+    'azure_policy_definitions': {
+        'GET': 'v3/azure-policy',
+        'POST': 'v3/azure-policy'
+    },
+    'azure_role_definitions': {
+        'GET': 'v3/azure-role',
+        'POST': 'v3/azure-role'
+    },
+    'compliance_standards': {
+        'GET': 'v3/compliance/standard',
+        'POST': 'v3/compliance/standard'
+    },
+    'compliance_checks': {
+        'GET': 'v3/compliance/check',
+        'POST': 'v3/compliance/check'
+    },
+    'internal_aws_amis': {
+        'GET': 'v3/ami',
+        'POST': 'v3/ami'
+    },
+    'internal_aws_service_catalog_portfolios': {
+        'GET': 'v3/service-catalog',
+        'POST': 'v3/service-catalog'
+    },
+    'ous': {
+        'GET': 'v3/ou',
+        'POST': 'v3/ou'
+    },
+    'owner_user_groups': {
+        'GET': 'v3/user-group',
+        'POST': 'v3/user-group'
+    },
+    'owner_users': {
+        'GET': 'v3/user',
+        'POST': 'v3/user'
+    },
+    'service_control_policies': {
+        'GET': 'v3/service-control-policy',
+        'POST': 'v3/service-control-policy'
+    },
+    'cloud_rules': {
+        'GET': 'v3/cloud-rule',
+        'POST': 'v3/cloud-rule'
+    }
 }
 
 def main():
@@ -175,10 +219,6 @@ def main():
     validate_connection(ARGS.ct_url)
     validate_import_dir(ARGS.import_dir)
 
-    # if ARGS.sync:
-    #     sync(ARGS)
-    #     sys.exit()
-
     print("\nBeginning import from %s" % ARGS.ct_url)
 
     if not ARGS.skip_cfts:
@@ -191,6 +231,8 @@ def main():
     else:
         print("\nSkipping AWS IAM Policies")
 
+    # ARMs cannot be cloned. Creating a new ARM requires setting a Resource Group
+    # which we won't know
     # if not ARGS.skip_arms:
     #     import_arms()
     # else:
@@ -201,10 +243,10 @@ def main():
     else:
         print("\nSkipping Azure Policies")
 
-    # if not ARGS.skip_azure_roles:
-    #     import_azure_roles()
-    # else:
-    #     print("\nSkipping Azure Roles")
+    if not ARGS.skip_azure_roles:
+        import_azure_roles()
+    else:
+        print("\nSkipping Azure Roles")
 
     if not ARGS.skip_project_roles:
         import_project_roles()
@@ -399,7 +441,6 @@ def import_iams():
 
         for i in IAMs:
             aws_managed     = False
-            ct_managed      = False
 
             if i['iam_policy']['aws_managed_policy']:
                 if not ARGS.import_aws_managed:
@@ -409,28 +450,38 @@ def import_iams():
                     aws_managed = True
 
             if i['iam_policy']['system_managed_policy']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping System-managed IAM Policy: %s" % i['iam_policy']['name'])
                     continue
                 else:
                     original_name = i['iam_policy']['name']       # save original name
                     i = i['iam_policy']                           # reset i to the lower-level object key
 
-                    # update the name using the clone prefix, and remove unnecessary fields
-                    i['name'] = f"{ARGS.clone_prefix}{i['name']}"
+                    # remove unnecessary fields
                     i.pop('id')
                     i.pop('aws_managed_policy')
                     i.pop('system_managed_policy')
 
                     # the clone_resource function checks if this object with the updated
                     # name already exists and won't create a clone if it does
-                    clone = clone_resource('aws_iam_policies', i)
+                    result, clone = clone_resource('aws_iam_policies', i)
                     if clone:
-                      print("Cloning System-managed IAM Policy: %s -> %s" % (original_name, i['name']))
-                      i = clone # reset the i object to the new clone
+                        print("Cloning System-managed IAM Policy: %s -> %s" % (original_name, i['name']))
+                        i = clone # reset the i object to the new clone
+                        owner_users     = process_owners(ARGS.clone_user_ids, "owner_users")
+                        owner_groups    = process_owners(ARGS.clone_user_group_ids, "owner_user_groups")
                     else:
-                      print("Already found a clone of %s. Skipping." % original_name)
-                      continue
+                        if result:
+                            print("Already found a clone of %s. Skipping." % original_name)
+                            continue
+                        else:
+                            print("An error occurred cloning %s" % original_name)
+                            continue
+            else:
+                print("Importing IAM Policy - %s" % i['iam_policy']['name'])
+                # get owner user and group IDs formatted into required format
+                owner_users     = process_owners(i['owner_users'], 'owner_users')
+                owner_groups    = process_owners(i['owner_user_groups'], 'owner_user_groups')
 
             # init new IAM object
             iam = {}
@@ -441,8 +492,6 @@ def import_iams():
             iam['owner_user_group_ids'] = []
             iam['policy']               = i['iam_policy']['policy'].rstrip()
 
-            print("Importing IAM Policy - %s" % iam['name'])
-
             # check for IAM path - requires cloudtamer > 2.23
             if 'aws_iam_path' in i:
                 iam['aws_iam_path'] = i['aws_iam_path'].strip()
@@ -452,13 +501,9 @@ def import_iams():
             # double all single dollar signs to be valid for TF format
             iam['policy'] = re.sub(r'\${1}\{', r'$${', iam['policy'])
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(i['owner_users'], 'owner_users')
-            owner_groups    = process_owners(i['owner_user_groups'], 'owner_user_groups')
-
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
-                    # id              = {id}
+                    # id            = {id}
                     name            = "{resource_name}"
                     description     = "{description}"
                     aws_iam_path    = "{aws_iam_path}"
@@ -487,7 +532,7 @@ def import_iams():
             )
 
             # build the base file name
-            base_filename = build_filename(iam['name'], aws_managed, ct_managed, ARGS.prepend_id, i_id)
+            base_filename = build_filename(iam['name'], aws_managed, ARGS.prepend_id, i_id)
 
             # if it is not an AWS managed, then set a standard filename
             # and add it to the list of imported resources. Otherwise, add .skip to the filename and
@@ -855,8 +900,7 @@ def import_cloud_rules():
         True
     """
     print("\nImporting Cloud Rules\n--------------------------")
-    url = '%s/v3/cloud-rule' % BASE_URL
-    cloud_rules = api_call(url)
+    cloud_rules = get_objects_or_ids('cloud_rules')
 
     if cloud_rules:
         print("Found %s Cloud Rules" % len(cloud_rules))
@@ -864,15 +908,15 @@ def import_cloud_rules():
 
         # now loop over them and get the CFT and IAM policy associations
         for c in cloud_rules:
-            ct_managed = False
+            system_managed = False
 
             # skip the built_in rules unless toggled on
             if c['built_in']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping built-in Cloud Rule: %s" % c['name'])
                     continue
                 else:
-                    ct_managed = True
+                    system_managed = True
 
             # get the the cloud rule's metadata
             cloud_rule = get_objects_or_ids("cloud_rules", False, c['id'])
@@ -892,25 +936,29 @@ def import_cloud_rules():
             else:
                 print("Failed getting Cloud Rule details.")
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(cloud_rule['owner_users'], 'owner_users')
-            owner_groups    = process_owners(cloud_rule['owner_user_groups'], 'owner_user_groups')
-
             # now that we have all these details, go through cloning process if this is a built-in cloud rule
-            if ct_managed:
+            if system_managed:
                 original_name = c['name']                       # save original name
-                c['name'] = f"{ARGS.clone_prefix}{c['name']}"   # update the name using the clone prefix
                 # the clone_resource function checks if this object with the updated
                 # name already exists and won't create a clone if it does
-                clone = clone_resource('cloud_rules', c)
+                result, clone = clone_resource('cloud_rules', c)
                 if clone:
-                    print("Cloning System-managed Cloud Rule: %s -> %s" % (original_name, c['name']))
-                    c['id'] = clone['cloud_rule']['id']
+                    print("Cloning System-managed Cloud Rule: %s -> %s" % (original_name, clone['cloud_rule']['name']))
+                    c['id']         = clone['cloud_rule']['id']
+                    c['name']       = clone['cloud_rule']['name']
+                    owner_users     = process_owners(ARGS.clone_user_ids, "owner_users")
+                    owner_groups    = process_owners(ARGS.clone_user_group_ids, "owner_user_groups")
                 else:
-                    print("Already found a clone of %s. Skipping." % original_name)
-                    continue
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
             else:
                 print("Importing Cloud Rule - %s" % c['name'])
+                # get owner user and group IDs formatted into required format
+                owner_users     = process_owners(cloud_rule['owner_users'], 'owner_users')
+                owner_groups    = process_owners(cloud_rule['owner_user_groups'], 'owner_user_groups')
 
             for i in ["pre_webhook_id", "post_webhook_id"]:
                 if c[i] is None:
@@ -918,7 +966,7 @@ def import_cloud_rules():
 
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
-                    # id                                      = {id}
+                    # id                                    = {id}
                     name                                    = "{resource_name}"
                     description                             = "{description}"
                     pre_webhook_id                          = {pre_webhook_id}
@@ -966,7 +1014,7 @@ def import_cloud_rules():
             )
 
             # build the base file name
-            base_filename = build_filename(c['name'], False, ct_managed, ARGS.prepend_id, c['id'])
+            base_filename = build_filename(c['name'], False, ARGS.prepend_id, c['id'])
             filename = "%s/cloud-rule/%s.tf" % (ARGS.import_dir, base_filename)
 
             # add to IMPORTED_RESOURCES
@@ -1004,17 +1052,15 @@ def import_compliance_checks():
         IMPORTED_MODULES.append("compliance-check")
 
         for c in CHECKS:
-            ct_managed = False
+            system_managed = False
 
             # skip cloudtamer managed checks unless toggled on
             if c['ct_managed']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping System-managed Compliance Check - %s" % c['name'])
                     continue
                 else:
-                    ct_managed = True
-
-            print("Importing Compliance Check - %s" % c['name'])
+                    system_managed = True
 
             # init new check object
             check = {}
@@ -1033,7 +1079,6 @@ def import_compliance_checks():
             check['owner_user_ids']             = []
             check['owner_user_group_ids']       = []
 
-
             # we need to make an additional call to get owner users and groups
             url = "%s/v3/compliance/check/%s" % (BASE_URL, c['id'])
             details = api_call(url)
@@ -1045,6 +1090,31 @@ def import_compliance_checks():
             else:
                 print("Failed to get details for check %s" % check['name'])
                 print(json.dumps(details))
+
+            # now attempt to clone if importing system-managed resources
+            if system_managed:
+                original_name = check['name']
+
+                # remove these fields before cloning
+                c.pop('id')
+                c.pop('ct_managed')
+
+                result, clone = clone_resource('compliance_checks', c)
+                if clone:
+                    print("Cloning System-managed Compliance Check: %s -> %s" % (original_name, c['name']))
+                    c               = clone['compliance_check']
+                    check['name']   = process_string(c['name'])     # override this to maintain refs to it later
+                    owner_users     = process_owners(ARGS.clone_user_ids, 'owner_users')
+                    owner_groups    = process_owners(ARGS.clone_user_group_ids, 'owner_user_groups')
+                else:
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
+                        continue
+            else:
+                print("Importing Compliance Check - %s" % c['name'])
 
             # properly format regions based on contents
             if check['regions'][0] == '':
@@ -1058,9 +1128,6 @@ def import_compliance_checks():
             elif check['frequency_type_id'] == int(4):
                 check['frequency_minutes'] = check['frequency_minutes'] // 1440 # daily, divide minutes by 1440
 
-            # double all single dollar signs to be valid for TF format
-            # check['body'] = re.sub(r'\${1}\{', r'$${', check['body'])
-
             # build template based on cloud provider
             # AWS = 1
             # Azure = 2
@@ -1068,7 +1135,7 @@ def import_compliance_checks():
             if check['cloud_provider_id'] == 1:
                 template = textwrap.dedent('''\
                     resource "{resource_type}" "{resource_id}" {{
-                        # id                          = {id}
+                        # id                        = {id}
                         name                        = "{resource_name}"
                         description                 = "{description}"
                         created_by_user_id          = {created_by_user_id}
@@ -1115,7 +1182,7 @@ def import_compliance_checks():
                 if check['compliance_check_type_id'] == 1:
                     template = textwrap.dedent('''\
                         resource "{resource_type}" "{resource_id}" {{
-                            # id                          = {id}
+                            # id                        = {id}
                             name                        = "{resource_name}"
                             description                 = "{description}"
                             created_by_user_id          = {created_by_user_id}
@@ -1156,7 +1223,7 @@ def import_compliance_checks():
                 elif check['compliance_check_type_id'] == 2:
                     template = textwrap.dedent('''\
                         resource "{resource_type}" "{resource_id}" {{
-                            # id                          = {id}
+                            # id                        = {id}
                             name                        = "{resource_name}"
                             description                 = "{description}"
                             created_by_user_id          = {created_by_user_id}
@@ -1202,7 +1269,7 @@ def import_compliance_checks():
                 elif check['compliance_check_type_id'] == 3:
                     template = textwrap.dedent('''\
                         resource "{resource_type}" "{resource_id}" {{
-                            # id                          = {id}
+                            # id                        = {id}
                             name                        = "{resource_name}"
                             description                 = "{description}"
                             created_by_user_id          = {created_by_user_id}
@@ -1247,7 +1314,7 @@ def import_compliance_checks():
             elif check['cloud_provider_id'] == 3:
                 template = textwrap.dedent('''\
                     resource "{resource_type}" "{resource_id}" {{
-                        # id                          = {id}
+                        # id                        = {id}
                         name                        = "{resource_name}"
                         description                 = "{description}"
                         created_by_user_id          = {created_by_user_id}
@@ -1299,19 +1366,12 @@ def import_compliance_checks():
                 content = re.sub(r'\s*body = <<-EOT\n\nEOT', '', content, re.MULTILINE)
 
             # build the base file name
-            base_filename = build_filename(check['name'], False, ct_managed, ARGS.prepend_id, c['id'])
+            base_filename = build_filename(check['name'], False, ARGS.prepend_id, c['id'])
+            filename = "%s/compliance-check/%s.tf" % (ARGS.import_dir, base_filename)
 
-            # if it is not a CT managed resource, then set a standard filename
-            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
-            # don't add it to the list of imported resources
-            if not ct_managed:
-                filename = "%s/compliance-check/%s.tf" % (ARGS.import_dir, base_filename)
-
-                # add to IMPORTED_RESOURCES
-                resource = "module.compliance-check.%s_compliance_check.%s %s" % (RESOURCE_PREFIX, normalize_string(check['name']), c['id'])
-                IMPORTED_RESOURCES.append(resource)
-            else:
-                filename = "%s/compliance-check/%s.tf.skip" % (ARGS.import_dir, base_filename)
+            # add to IMPORTED_RESOURCES
+            resource = "module.compliance-check.%s_compliance_check.%s %s" % (RESOURCE_PREFIX, normalize_string(check['name']), c['id'])
+            IMPORTED_RESOURCES.append(resource)
 
             write_file(filename, process_template(content))
 
@@ -1344,17 +1404,15 @@ def import_compliance_standards():
         IMPORTED_MODULES.append("compliance-standard")
 
         for s in STANDARDS:
-            ct_managed = False
+            system_managed = False
 
-            # skip cloudtamer managed checks unless toggled on
-            if s['ct_managed'] or s['created_by_user_id'] == 0:
-                if not ARGS.import_system_managed:
+            # skip system managed standards unless toggled on
+            if (s['ct_managed'] or s['created_by_user_id'] == 0) and not s['name'].startswith(ARGS.clone_prefix):
+                if not ARGS.clone_system_managed:
                     print("Skipping built-in Compliance Standard - %s" % s['name'])
                     continue
                 else:
-                    ct_managed = True
-
-            print("Importing Compliance Standard - %s" % s['name'])
+                    system_managed = True
 
             # init new object
             standard = {}
@@ -1376,27 +1434,32 @@ def import_compliance_standards():
                 for c in details['compliance_checks']:
                     standard['checks'].append(c['id'])
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(details['owner_users'], 'owner_users')
-            owner_groups    = process_owners(details['owner_user_groups'], 'owner_user_groups')
+            if system_managed:
+                original_name = standard['name']
 
-            # format the list of compliance check IDs into a multiline string
-            # that prints nicely in the template
-            # checks = ''
-            # for check in standard['checks']:
-            #     if check != standard['checks'][-1]:
-            #         checks += "\n        %s," % check
-            #     else:
-            #         checks += "\n        %s" % check
-
-            # checks    = []
-            # for i in standard['checks']:
-            #     line = "compliance_checks { id = %s }" % i
-            #     checks.append(line)
+                result, clone = clone_resource('compliance_standards', standard)
+                if clone:
+                    print("Cloning System-managed Compliance Standard: %s -> %s" % (original_name, clone['compliance_standard']['name']))
+                    standard['name']                = clone['compliance_standard']['name']
+                    standard['created_by_user_id']  = clone['compliance_standard']['created_by_user_id']
+                    s['id']                         = clone['compliance_standard']['id']
+                    owner_users                     = process_owners(ARGS.clone_user_ids, 'owner_users')
+                    owner_groups                    = process_owners(ARGS.clone_user_group_ids, 'owner_user_groups')
+                else:
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
+                        continue
+            else:
+                print("Importing Compliance Standard - %s" % s['name'])
+                owner_users     = process_owners(details['owner_users'], 'owner_users')
+                owner_groups    = process_owners(details['owner_user_groups'], 'owner_user_groups')
 
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
-                    # id                          = {id}
+                    # id                        = {id}
                     name                        = "{resource_name}"
                     description                 = "{description}"
                     created_by_user_id          = {created_by_user_id}
@@ -1422,19 +1485,12 @@ def import_compliance_standards():
             )
 
             # build the file name
-            base_filename = build_filename(standard['name'], False, ct_managed, ARGS.prepend_id, s['id'])
+            base_filename = build_filename(standard['name'], False, ARGS.prepend_id, s['id'])
+            filename = "%s/compliance-standard/%s.tf" % (ARGS.import_dir, base_filename)
 
-            # if it is not a CT managed resource, then set a standard filename
-            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
-            # don't add it to the list of imported resources
-            if not ct_managed:
-                filename = "%s/compliance-standard/%s.tf" % (ARGS.import_dir, base_filename)
-
-                # add to IMPORTED_RESOURCES
-                resource = "module.compliance-standard.%s_compliance_standard.%s %s" % (RESOURCE_PREFIX, normalize_string(standard['name']), s['id'])
-                IMPORTED_RESOURCES.append(resource)
-            else:
-                filename = "%s/compliance-standard/%s.tf.skip" % (ARGS.import_dir, base_filename)
+            # add to IMPORTED_RESOURCES
+            resource = "module.compliance-standard.%s_compliance_standard.%s %s" % (RESOURCE_PREFIX, normalize_string(standard['name']), s['id'])
+            IMPORTED_RESOURCES.append(resource)
 
             write_file(filename, process_template(content))
 
@@ -1469,20 +1525,21 @@ def import_arms():
         IMPORTED_MODULES.append("azure-arm-template")
 
         for a in ARMs:
-            ct_managed      = False
+            system_managed = False
 
             if a['azure_arm_template']['ct_managed']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping System-managed Azure ARM Template: %s" % a['azure_arm_template']['name'])
                     continue
                 else:
-                    ct_managed = True
+                    system_managed = True
 
             # init new IAM object
             arm = {}
             a_id                                = a['azure_arm_template']['id']
             arm['name']                         = process_string(a['azure_arm_template']['name'])
             arm['description']                  = process_string(a['azure_arm_template']['description'])
+            arm['deployment_mode']              = a['azure_arm_template']['deployment_mode']
             arm['resource_group_name']          = process_string(a['azure_arm_template']['resource_group_name'])
             arm['resource_group_region_id']     = a['azure_arm_template']['resource_group_region_id']
             arm['owner_user_ids']               = []
@@ -1491,20 +1548,44 @@ def import_arms():
             arm['template_parameters']          = a['azure_arm_template']['template_parameters'].rstrip()
             arm['version']                      = a['azure_arm_template']['version']
 
-            print("Importing Azure ARM Template - %s" % arm['name'])
-
             # double all single dollar signs to be valid for TF format
             arm['template'] = re.sub(r'\${1}\{', r'$${', arm['template'])
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(a['owner_users'], 'owner_users')
-            owner_groups    = process_owners(a['owner_user_groups'], 'owner_user_groups')
+            if system_managed:
+                original_name = arm['name']
+
+                a = a['azure_arm_template']
+                a.pop('version')
+
+                a['name']                   = "\"%s\"" % a['name']
+                a['description']            = "\"%s\"" % a['description']
+                a['resource_group_name']    = "\"%s\"" % a['resource_group_name']
+
+                print("clone1: %s" % json.dumps(a))
+                result, clone = clone_resource('azure_arm_template_definitions', a)
+                if clone:
+                    print("clone: %s" % json.dumps(clone))
+                    a_id            = clone['azure_arm_template']['id']
+                    arm['name']     = process_string(clone['azure_arm_template']['name'])
+                    owner_users     = process_owners(ARGS.clone_user_ids, "owner_users")
+                    owner_groups    = process_owners(ARGS.clone_user_group_ids, "owner_user_groups")
+                else:
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
+            else:
+                print("Importing Azure ARM Template - %s" % arm['name'])
+                owner_users     = process_owners(a['owner_users'], 'owner_users')
+                owner_groups    = process_owners(a['owner_user_groups'], 'owner_user_groups')
 
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
                     # id                        = {id}
                     name                        = "{resource_name}"
                     description                 = "{description}"
+                    deployment_mode             = {deployment_mode} # 1 = incremental, 2 = complete
                     resource_group_name         = "{resource_group_name}"
                     resource_group_region_id    = {resource_group_region_id}
                     version                     = {version}
@@ -1530,6 +1611,7 @@ def import_arms():
                 id=a_id,
                 resource_name=arm['name'],
                 description=arm['description'],
+                deployment_mode=arm['deployment_mode'],
                 resource_group_name=arm['resource_group_name'],
                 resource_group_region_id=arm['resource_group_region_id'],
                 version=arm['version'],
@@ -1540,23 +1622,15 @@ def import_arms():
             )
 
             # build the base file name
-            base_filename = build_filename(arm['name'], False, ct_managed, ARGS.prepend_id, a_id)
+            base_filename = build_filename(arm['name'], False, ARGS.prepend_id, a_id)
+            filename = "%s/azure-arm-template/%s.tf" % (ARGS.import_dir, base_filename)
 
-            # if it is not an AWS managed and not a CT managed resource, then set a standard filename
-            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
-            # don't add it to the list of imported resources
-            if not ct_managed:
-                filename = "%s/azure-arm-template/%s.tf" % (ARGS.import_dir, base_filename)
-
-                # add to IMPORTED_RESOURCES
-                resource = "module.azure-arm-template.%s_azure_arm_template.%s %s" % (RESOURCE_PREFIX, normalize_string(arm['name']), a_id)
-                IMPORTED_RESOURCES.append(resource)
-            else:
-                filename = "%s/azure-arm-template/%s.tf.skip" % (ARGS.import_dir, base_filename)
+            # add to IMPORTED_RESOURCES
+            resource = "module.azure-arm-template.%s_azure_arm_template.%s %s" % (RESOURCE_PREFIX, normalize_string(arm['name']), a_id)
+            IMPORTED_RESOURCES.append(resource)
 
             # write the file
             write_file(filename, process_template(content))
-
         # now out of the loop, write the provider.tf file
         provider_filename = "%s/azure-arm-template/provider.tf" % ARGS.import_dir
         write_provider_file(provider_filename, PROVIDER_TEMPLATE)
@@ -1587,14 +1661,14 @@ def import_azure_policies():
         IMPORTED_MODULES.append("azure-policy")
 
         for p in POLICIES:
-            ct_managed      = False
+            system_managed      = False
 
             if p['azure_policy']['ct_managed']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping System-managed Azure Policy: %s" % p['azure_policy']['name'])
                     continue
                 else:
-                    ct_managed = True
+                    system_managed = True
 
             # init new IAM object
             policy = {}
@@ -1607,11 +1681,36 @@ def import_azure_policies():
             policy['policy']                        = p['azure_policy']['policy'].rstrip()
             policy['parameters']                    = p['azure_policy']['parameters'].rstrip()
 
-            print("Importing Azure Policy - %s" % policy['name'])
+            if system_managed:
+                original_name = p['azure_policy']['name']
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(p['owner_users'], 'owner_users')
-            owner_groups    = process_owners(p['owner_user_groups'], 'owner_user_groups')
+                # # remove unnecessary fields
+                p['azure_policy'].pop('azure_managed_policy_def_id', None)
+
+                # set policyType to Custom
+                P = json.loads(p['azure_policy']['policy'])
+                P['policyType'] = "Custom"
+                p['azure_policy']['policy'] = json.dumps(P)
+
+                result, clone = clone_resource('azure_policy_definitions', p)
+                if clone:
+                    print("Cloning System-managed Azure Policy: %s -> %s" % (original_name, clone['azure_policy']['name']))
+                    p_id            = clone['azure_policy']['id']
+                    policy['name']  = clone['azure_policy']['name']
+                    owner_users     = process_owners(ARGS.clone_user_ids, "owner_users")
+                    owner_groups    = process_owners(ARGS.clone_user_group_ids, "owner_user_groups")
+                else:
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
+                        continue
+            else:
+                print("Importing Azure Policy - %s" % policy['name'])
+                # get owner user and group IDs formatted into required format
+                owner_users     = process_owners(p['owner_users'], 'owner_users')
+                owner_groups    = process_owners(p['owner_user_groups'], 'owner_user_groups')
 
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
@@ -1649,19 +1748,12 @@ def import_azure_policies():
             )
 
             # build the base file name
-            base_filename = build_filename(policy['name'], False, ct_managed, ARGS.prepend_id, p_id)
+            base_filename = build_filename(policy['name'], False, ARGS.prepend_id, p_id)
+            filename = "%s/azure-policy/%s.tf" % (ARGS.import_dir, base_filename)
 
-            # if it is not an AWS managed and not a CT managed resource, then set a standard filename
-            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
-            # don't add it to the list of imported resources
-            if not ct_managed:
-                filename = "%s/azure-policy/%s.tf" % (ARGS.import_dir, base_filename)
-
-                # add to IMPORTED_RESOURCES
-                resource = "module.azure-policy.%s_azure_policy.%s %s" % (RESOURCE_PREFIX, normalize_string(policy['name']), p_id)
-                IMPORTED_RESOURCES.append(resource)
-            else:
-                filename = "%s/azure-policy/%s.tf.skip" % (ARGS.import_dir, base_filename)
+            # add to IMPORTED_RESOURCES
+            resource = "module.azure-policy.%s_azure_policy.%s %s" % (RESOURCE_PREFIX, normalize_string(policy['name']), p_id)
+            IMPORTED_RESOURCES.append(resource)
 
             # write the file
             write_file(filename, process_template(content))
@@ -1696,18 +1788,18 @@ def import_azure_roles():
         IMPORTED_MODULES.append("azure-role")
 
         for r in ROLES:
-            ct_managed      = False
+            system_managed      = False
 
             if r['azure_role']['azure_managed_policy']:
                 print("Skipping Azure-managed Azure Role: %s" % r['azure_role']['name'])
                 continue
 
             if r['azure_role']['system_managed_policy']:
-                if not ARGS.import_system_managed:
+                if not ARGS.clone_system_managed:
                     print("Skipping System-managed Azure Role: %s" % r['azure_role']['name'])
                     continue
                 else:
-                    ct_managed = True
+                    system_managed = True
 
             # init new object
             role = {}
@@ -1718,11 +1810,29 @@ def import_azure_roles():
             role['owner_user_ids']          = []
             role['owner_user_group_ids']    = []
 
-            print("Importing Azure Role - %s" % role['name'])
 
-            # get owner user and group IDs formatted into required format
-            owner_users     = process_owners(r['owner_users'], 'owner_users')
-            owner_groups    = process_owners(r['owner_user_groups'], 'owner_user_groups')
+            if system_managed:
+                original_name = role['name']
+
+                r = r['azure_role']
+                result, clone = clone_resource('azure_role_definitions', r)
+                if clone:
+                    print("Cloning System-managed Azure Role: %s -> %s" % (original_name, clone['azure_role']['name']))
+                    role['name']    = clone['azure_role']['name']
+                    r_id            = clone['azure_role']['id']
+                    owner_users     = process_owners(ARGS.clone_user_ids, "owner_users")
+                    owner_groups    = process_owners(ARGS.clone_user_group_ids, "owner_user_groups")
+                else:
+                    if result:
+                        print("Already found a clone of %s. Skipping." % original_name)
+                        continue
+                    else:
+                        print("An error occurred cloning %s" % original_name)
+                        continue
+            else:
+                print("Importing Azure Role - %s" % role['name'])
+                owner_users     = process_owners(r['owner_users'], 'owner_users')
+                owner_groups    = process_owners(r['owner_user_groups'], 'owner_user_groups')
 
             template = textwrap.dedent('''\
                 resource "{resource_type}" "{resource_id}" {{
@@ -1753,19 +1863,12 @@ def import_azure_roles():
             )
 
             # build the base file name
-            base_filename = build_filename(role['name'], False, ct_managed, ARGS.prepend_id, r_id)
+            base_filename = build_filename(role['name'], False, ARGS.prepend_id, r_id)
+            filename = "%s/azure-role/%s.tf" % (ARGS.import_dir, base_filename)
 
-            # if it is not an AWS managed and not a CT managed resource, then set a standard filename
-            # and add it to the list of imported resources. Otherwise, add .skip to the filename and
-            # don't add it to the list of imported resources
-            if not ct_managed:
-                filename = "%s/azure-role/%s.tf" % (ARGS.import_dir, base_filename)
-
-                # add to IMPORTED_RESOURCES
-                resource = "module.azure-role.%s_azure_role.%s %s" % (RESOURCE_PREFIX, normalize_string(role['name']), r_id)
-                IMPORTED_RESOURCES.append(resource)
-            else:
-                filename = "%s/azure-role/%s.tf.skip" % (ARGS.import_dir, base_filename)
+            # add to IMPORTED_RESOURCES
+            resource = "module.azure-role.%s_azure_role.%s %s" % (RESOURCE_PREFIX, normalize_string(role['name']), r_id)
+            IMPORTED_RESOURCES.append(resource)
 
             # write the file
             write_file(filename, process_template(content))
@@ -1906,7 +2009,7 @@ def get_objects_or_ids(object_type, cloud_rule=False, object_id=False):
             ids.append(i['id'])
         return ids
     else:
-        api_endpoint = OBJECT_API_MAP[object_type]
+        api_endpoint = get_api_endpoint(object_type, 'GET')
 
         if object_id:
           url = "%s/%s/%s" % (BASE_URL, api_endpoint, object_id)
@@ -1931,104 +2034,191 @@ def clone_resource(resource_type, resource):
         resource            (dict)  - a dict of the resource's attributes
 
     Returns:
-        Success:
+        If clone was successful:
+            True        (bool)
             resource    (dict)  - A dict of the newly cloned resource
-        Failure:
+        If matching cloned resource was already found:
+            True        (bool)
+            False       (bool)
+        If failure:
+            False       (bool)
             False       (bool)
     """
-    if not search_object(resource_type, resource['name']):
-        # set up the new cloned resource object
-        clone = resource
-        clone.pop('id')
-        clone['owner_user_ids']       = ARGS.clone_user_ids
-        clone['owner_user_group_ids'] = ARGS.clone_user_group_ids
 
-        # set up the API URL to hit and make the call
-        # this post should create the new cloned resource
-        api_endpoint = OBJECT_API_MAP[resource_type]
-        url = "%s/%s" % (BASE_URL, api_endpoint)
-        response = api_call(url, 'post', resource)
-        print("post response: %s" % json.dumps(response))
-        if response:
-            if 'status' in response:
-                if 'record_id' in response:
-                    clone = get_objects_or_ids('cloud_rules', False, response['record_id'])
-                    if clone:
-                        return clone
+    # first do some preparation for cloning
+
+    # find the name key, ensure its prepended with the clone prefix
+    # and save it to a temp variable
+
+    if 'name' in resource:
+        if not resource['name'].startswith(ARGS.clone_prefix):
+            resource['name'] = f"{ARGS.clone_prefix}{resource['name']}"
+            name = resource['name']
+    else:
+
+        # some types of resources are structured differently when it comes to creating them.
+        # azure_policies for example needs to have a nested key called 'azure_policy' and under
+        # that is the name key. most others have the name key at the root level
+        other_structures = ['azure_policy']
+        for s in other_structures:
+            if s in resource:
+                if 'name' in resource[s]:
+                    if not resource[s]['name'].startswith(ARGS.clone_prefix):
+                        resource[s]['name'] = f"{ARGS.clone_prefix}{resource[s]['name']}"
+                        name = resource[s]['name']
                     else:
-                        return False
-                else:
-                    print("Didn't receive a record ID when cloning resource: %s" % response)
-            else:
-                print("Received bad response while cloning resource: %s" % response)
+                        name = False
+
+                # remove some fields while were in here
+                resource[s].pop('ct_managed', None)
+                resource[s].pop('built_in', None)
+                resource[s].pop('id', None)
+
+    # validate that we found the name
+    if not name:
+        print("Couldn't find the name key in %s" % json.dumps(resource))
+        return False
+
+    # remove some fields
+    resource.pop('ct_managed', None)
+    resource.pop('built_in', None)
+    resource.pop('id', None)
+
+    # at this point, we found the name and made sure it's prefixed with the clone prefix
+    # now lets search for a matching resource
+    search = search_resource(resource_type, name)
+
+    if search == []:
+
+        # an empty list means there were no resources matching the clone were found
+        # so attempt to create it
+
+        # set owner users and groups
+        # these keys are inconsistent across the different resource types
+        # so just set both
+        for key in ['owner_users', 'owner_user_ids']:
+            resource[key] = ARGS.clone_user_ids
+        for key in ['owner_user_groups', 'owner_user_group_ids']:
+            resource[key] = ARGS.clone_user_group_ids
+
+        new_resource = create_resource(resource_type, resource)
+        if new_resource:
+            return True, new_resource
         else:
-            print("Failed cloning resource: %s - %s" % (resource_type, json.dumps(resource)))
+            return False, False
+
+    elif search is False:
+        # False means an error occurred
+        return False, "error occurred searching for resource"
+    elif isinstance(search, dict):
+        # if we got a dict back, it means a matching resource was found
+        # we dont need to return this back as the caller already has it
+        return True, False
+
+
+def create_resource(resource_type, resource):
+    """
+    Creates a new resource of resource_type
+
+    Params:
+        resource_type       (str)   - the type of resource to create
+        resource            (dict)  - the complete resource object to be created
+
+    Returns:
+        If success:
+            resource        (dict)  - the newly created resource object
+        If failure:
+            False           (bool)
+    """
+
+
+    # set up the API URL to hit and make the call
+    # this post should create the new cloned resource
+    api_endpoint = get_api_endpoint(resource_type, 'POST')
+    url = "%s/%s" % (BASE_URL, api_endpoint)
+    response = api_call(url, 'post', resource)
+
+    # print("post payload: %s" % json.dumps(resource, indent=2))
+    # print("post response: %s" % json.dumps(response))
+
+    if response:
+        if 'status' in response:
+            if 'record_id' in response:
+                resource = get_objects_or_ids(resource_type, False, response['record_id'])
+                if resource:
+                    return resource
+                else:
+                    return False
+            else:
+                print("Didn't receive a record ID when creating resource: %s" % json.dumps(response))
+                return False
+        else:
+            print("Received bad response while creating resource: %s" % json.dumps(response))
             return False
     else:
+        print("Failed creating resource: %s" % json.dumps(resource))
         return False
 
 
-def search_object(type, terms):
+def search_resource(type, terms, match_key='name'):
     """
     Helper function to search cloudtamer for objects of type using provided search terms
 
     Params:
-        Type:   (str) - the type of object to search for
-        Terms:  (str) - the search terms
+        type:       (str) - the type of resource to search for
+        terms:      (str) - the search terms
+        match_key:  (str) - the key to match the terms against. defaults to 'name'
 
     Return:
         If found:
-        response   (list) - list of matching objects
+            item            (dict) - dict of the matching object
         If not found:
-        False     (bool)
+            empty list      (list)
+        If error:
+            False           (bool)
     """
-    search_url_map = {
-        'aws_iam_policies': 'v1/aws-iam-policy/search',
-        'aws_cloudformation_templates': 'v1/aws-cloudformation-policy/search',
-        'cloud_rules': 'v1/resource-policy/search',
-        'azure_roles': 'v4/azure-role',
-        'azure_policies': 'v1/azure-policy/search',
-        'azure_arm_templates': 'v4/azure-arm-template'
+
+    # maps the type that we receive to the type as it will show up in the search results
+    type_map = {
+        'aws_iam_policies': 'iam',
+        'aws_cloudformation_templates': 'cft',
+        'cloud_rules': 'cloud_rule',
+        'compliance_checks': 'compliance_check',
+        'compliance_standards': 'compliance_standard',
+        'azure_role_definitions': 'azure_role',
+        'azure_policy_definitions': 'azure_policy',
+        'azure_arm_template_definitions': 'arm_template'
     }
 
-    search_url = search_url_map[type]
-    if 'v4' in search_url:
-        # v4's use GET requests and the q= query param
-        url = "%s/%s?q=%s" % (BASE_URL, search_url, terms)
-        response = api_call(url)
+    if type not in type_map.keys():
+        print("Received unmapped type: %s" % type)
+        return False
     else:
-        url = "%s/%s" % (BASE_URL, search_url)
-        payload = {"query": terms}
-        response = api_call(url, 'post', payload)
+        type_match = type_map[type]
 
-    # the response we get can vary widely, so we have to do some thorough
-    # checking to see if we got a match or not
+    url = "%s/v1/search" % BASE_URL
+    payload = {"query": terms}
+    response = api_call(url, 'post', payload)
+
     # print("search response: %s" % json.dumps(response))
-    if response:
-        if 'total' in response:
-            if response['total'] == 0:
-                return False
-            else:
-                if 'items' in response:
-                    if response['items'] == []:
-                        return False
-                    else:
-                        for item in response['items']:
-                            if item['name'] == terms:
-                                return response
-                        return False
-                else:
-                    return False
 
-        if isinstance(response, list):
-            if len(response) > 0:
-                return response
-            else:
-                return False
-        else:
-            return False
+    if response == []:
+        # an empty list means 0 search results
+        return []
+    elif not response:
+        # a False response means some sort of error
+        return False
+    elif len(response) > 0:
+        # here we have some matches
+        # loop over them and compare item[match_key] to search terms
+        # return empty list if nothing matches (should find a match)
+        for item in response:
+            if item['type'] == type_match:
+                if item[match_key] == terms:
+                    return item
+        return []
     else:
-        # we may have received an empty list, meaning nothing was found which will take us here
+        # default to a False return - something went wrong
         return False
 
 
@@ -2189,7 +2379,7 @@ def api_call(url, method='get', payload=None, headers=None, timeout=30, test=Fal
         response = requests.get(url, headers=_headers, timeout=timeout, verify=verify)
       elif method.lower() == 'post':
         if payload:
-          response = requests.post(url, headers=_headers, json=payload, timeout=timeout, verify=verify)
+            response = requests.post(url, headers=_headers, json=payload, timeout=timeout, verify=verify)
         else:
           response = requests.post(url, headers=_headers, timeout=timeout, verify=verify)
       else:
@@ -2252,6 +2442,29 @@ def api_call(url, method='get', payload=None, headers=None, timeout=30, test=Fal
       return False
 
 
+def get_api_endpoint(resource, method):
+    """
+    Helper function to return the proper API endpoint for the
+    provided resource and method
+
+    Params:
+        resource    (str)   - the resource that we are interacting with. Must be defined in OBJECT_API_MAP
+        method      (str)   - the method being used to interact with the resource's API
+
+    Returns:
+        endpoint    (str)   - the corresponding endpoint
+    """
+    if resource in OBJECT_API_MAP.keys():
+        if method in OBJECT_API_MAP[resource].keys():
+            return OBJECT_API_MAP[resource][method]
+        else:
+            print("Didn't find %s defined for %s in the map." % (method, resource))
+            return False
+    else:
+        print("Didn't find %s defined in the map." % resource)
+        return False
+
+
 def validate_connection(url):
     """
     Validate Connection
@@ -2297,7 +2510,7 @@ def validate_import_dir(path):
         'compliance-standard': ARGS.skip_standards,
         # 'azure-arm-template': ARGS.skip_arms,
         'azure-policy': ARGS.skip_azure_policies,
-        # 'azure-role': ARGS.skip_azure_roles
+        'azure-role': ARGS.skip_azure_roles
     }
 
     if os.path.isdir(path):
@@ -2332,7 +2545,7 @@ def process_owners(input, text):
     required for the TF config files
 
     Param:
-        input   (list)  - list of owner user objects returned from cloudtamer
+        input   (list)  - list of owner user objects returned from cloudtamer, or just IDs
         text    (str)   - text to prepend to each line in output
                             ('owner_users' or 'owner_user_groups')
 
@@ -2344,8 +2557,11 @@ def process_owners(input, text):
 
     # get all of the user IDs, store in ids
     for i in input:
-        if 'id' in i:
-            ids.append(i['id'])
+        if isinstance(i, dict):
+            if 'id' in i:
+                ids.append(i['id'])
+        elif isinstance(i, int):
+            ids.append(i)
 
     if len(ids):
         for i in ids:
@@ -2414,14 +2630,13 @@ def process_template(input):
     return output
 
 
-def build_filename(base: str, aws_managed=False, ct_managed=False, prepend_id=False, r_id=False):
+def build_filename(base, aws_managed=False, prepend_id=False, r_id=False):
     """
     Helper funcion to build the filename based on provided parameters
 
     Params:
         base        (str)   - base name of the file
         aws_managed (bool)  - whether or not this is an AWS-managed resource
-        ct_managed  (bool)  - whether or not this is a CT-managed resource
         prepend_id  (bool)  - whether or not to prepend the resource ID to the name
         r_id        (str)   - the resource's ID to prepend, if prepend_id is True
 
@@ -2432,10 +2647,8 @@ def build_filename(base: str, aws_managed=False, ct_managed=False, prepend_id=Fa
 
     if aws_managed:
         base_filename = "AWS_Managed_%s" % base_filename
-    elif ct_managed:
-        base_filename = "CT_Managed_%s" % base_filename
 
-    if ARGS.prepend_id:
+    if prepend_id:
         if r_id:
             base_filename = normalize_string(base_filename, r_id)
         else:
