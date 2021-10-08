@@ -21,6 +21,18 @@ If `main.tf` already exists, the script will create a `main.tf.example` file ins
 
 For all imported resources, the script will follow a similar process for creating a `provider.tf` file in each module directory.
 
+## Workflow
+
+The general workflow when using this script for the first time, or on subsequent runs when new resource types are imported is:
+
+1. Import all resources
+2. Change directories into the terraform-managed directory
+3. Run `terraform init`
+4. Run `bash import_resource_state.sh` (imports resources into the terraform state - can take a long time)
+5. Run `terraform plan`
+6. Review proposed changes
+7. Run `terraform apply`
+
 ## Importing Current Resource State
 
 After importing resources from your installation of cloudtamer.io, but before running your first `terraform plan`, you'll need to generate the Terraform state. After running the importer script, it will generate a bash script for you that you can run to easily do this. The script contains the `terraform import` command for each individual resource that was imported during the run.
@@ -232,7 +244,7 @@ Example usage:
 $ python3 terraform-importer --skip-cloud-rules
 ```
 
-### `--skip-compliance-checks`
+### `--skip-checks`
 
 Skip importing Compliance Checks.
 
@@ -242,7 +254,7 @@ Example usage:
 $ python3 terraform-importer --skip-checks
 ```
 
-### `--skip-compliance-standards`
+### `--skip-standards`
 
 Skip importing Compliance Standards.
 
@@ -250,6 +262,26 @@ Example usage:
 
 ```bash
 $ python3 terraform-importer --skip-standards
+```
+
+### `--skip-azure-policies`
+
+Skip importing Azure Policies.
+
+Example usage:
+
+```bash
+$ python3 terraform-importer --skip-azure-policies
+```
+
+### `--skip-azure-roles`
+
+Skip importing Azure Roles.
+
+Example usage:
+
+```bash
+$ python3 terraform-importer --skip-azure-roles
 ```
 
 ### `--skip-ssl-verify`
@@ -266,35 +298,50 @@ Example usage:
 $ python3 terraform-importer --skip-ssl-verify
 ```
 
-### `--import-ct-managed`
+### `--clone-system-managed`
 
-Import cloudtamer-managed resources.
+Clone system-managed resources.
 
-These resources cannot be changed or deleted, and so they will have `.skip` appended to their filenames
-to make Terraform ignore them. This is done so that Terraform will not try to manage them.
+When this flag is used, the script will make a clone of all system-managed resources and then import those clones into the repository.
 
-They will also not be listed in the `import_resource_state.sh` bash script as there is no
-purpose in importing them into the Terraform state since they cannot be managed.
+Not all resources are compatible with being cloned and some errors may occur during the cloning process.
 
-You may want to import then to easily find their IDs
-for referencing in other resources, or just for reviewing their content.
+This flag requires 2 to 3 other flags to be used along with it:
+
+#### `--clone-prefix`
+
+A string to prepend to each cloned resource's name. It must end with a dash or underscore.
+
+#### `--clone-user-ids`
+
+A space separated list of user IDs to be set as the owners of the cloned resources.
+
+You must provide this flag or `--clone-user-group-ids` or both when cloning.
+
+#### `--clone-user-group-ids`
+
+A space separated list of user group IDs to be set as the owners of the cloned resources.
+
+You must provide this flag or `--clone-user-ids` or both when cloning.
+
+Example of cloning and providing all flags:
 
 ```bash
-$ python3 terraform-importer --import-ct-managed
+$ python3 terraform-importer --clone-system-managed --clone-prefix MYCLONE_ --clone-user-ids 1 2 --clone-user-group-ids 3 4
 ```
 
 ### `--import-aws-managed`
 
 Import AWS-managed resources that are already present in cloudtamer.
 
+You may want to import then to easily find their IDs
+for referencing in other resources, or just for reviewing their content.
+
 These resources cannot be changed or deleted, and so they will have `.skip` appended to their filenames
 to make Terraform ignore them. This is done so that Terraform will not try to manage them.
 
 They will also not be listed in the `import_resource_state.sh` bash script as there is no
 purpose in importing them into the Terraform state since they cannot be managed.
-
-You may want to import then to easily find their IDs
-for referencing in other resources, or just for reviewing their content.
 
 ```bash
 $ python3 terraform-importer --import-aws-managed
