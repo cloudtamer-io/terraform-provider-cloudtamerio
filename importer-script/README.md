@@ -304,7 +304,15 @@ Clone system-managed resources.
 
 When this flag is used, the script will make a clone of all system-managed resources and then import those clones into the repository.
 
+Keep in mind that doing this will effectively double the number of resources in your instance of cloudtamer, which can lead to a lot of clutter.
+
 Not all resources are compatible with being cloned and some errors may occur during the cloning process.
+
+Some errors that occurred while developing this function were all Azure related:
+
+- Azure compliance checks not having a valid Azure Policy Definition ID
+- Azure Policies failing due to an invalid policy
+- Azure Roles failing due to an invalid policy
 
 This flag requires 2 to 3 other flags to be used along with it:
 

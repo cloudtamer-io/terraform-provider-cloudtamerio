@@ -2077,7 +2077,7 @@ def clone_resource(resource_type, resource):
     # validate that we found the name
     if not name:
         print("Couldn't find the name key in %s" % json.dumps(resource))
-        return False
+        return False, False
 
     # remove some fields
     resource.pop('ct_managed', None)
