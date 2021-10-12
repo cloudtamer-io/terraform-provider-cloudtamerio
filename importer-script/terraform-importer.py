@@ -38,8 +38,6 @@ PARSER.add_argument('--clone-system-managed', action='store_true', help='Clone s
 PARSER.add_argument('--clone-prefix', type=str, help='A prefix for the name of cloned system-managed resources. Use with --clone-system-managed.')
 PARSER.add_argument('--clone-user-ids', nargs='+', type=int, help='Space separated user IDs to set as owner users for cloned resources')
 PARSER.add_argument('--clone-user-group-ids', nargs='+', type=int, help='Space separated user group IDs to set as owner user groups for cloned resources')
-
-
 # PARSER.add_argument('--dry-run', action='store_true', help='Perform a dry run without writing any files.')
 # PARSER.add_argument('--sync', action='store_true',help='Sync repository resources into cloudtamer.')
 ARGS = PARSER.parse_args()
@@ -2399,47 +2397,46 @@ def api_call(url, method='get', payload=None, headers=None, timeout=30, test=Fal
       return False
     else:
 
-      # at this point, no exceptions were thrown so the
-      # the request succeeded
+        # at this point, no exceptions were thrown so the
+        # the request succeeded
 
-      # check if test is True, if so return True
-      if test:
-        return True
+        # check if test is True, if so return True
+        if test:
+            return True
 
-      # test for valid json response
-      try:
-        response.json()
-      except JSONDecodeError as e:
-        print("JSON decode error on response: %s, %s" % (response, e))
-        return False
-      else:
-        response = response.json()
-
-      if response['status'] == 200:
-        # reset the unauth retry counter
-        global UNAUTH_RETRY_COUNTER
-        UNAUTH_RETRY_COUNTER = 0
-        return response['data']
-      elif response['status'] == 201:
-        # 201's are the return code for resource creations
-        # and the response object can vary, so just return the whole thing
-        # and make the calling function deal with it
-
-        return response
-      elif response['status'] == 401:
-        # retry up to MAX_UNAUTH_RETRIES
-        if UNAUTH_RETRY_COUNTER < MAX_UNAUTH_RETRIES:
-          retries = MAX_UNAUTH_RETRIES - UNAUTH_RETRY_COUNTER
-          print("Received unauthorized response. Will retry %s more times." % retries)
-          UNAUTH_RETRY_COUNTER += 1
-          api_call(url)
+        # test for valid json response
+        try:
+            response.json()
+        except JSONDecodeError as e:
+            print("JSON decode error on response: %s, %s" % (response, e))
+            return False
         else:
-          print("Hit max unauth retries.")
-          return False
-      else:
-        print(response['status'])
-        print("Error calling API: %s\n%s" % (url, response))
-      return False
+            response = response.json()
+
+        if response['status'] == 200:
+            # reset the unauth retry counter
+            global UNAUTH_RETRY_COUNTER
+            UNAUTH_RETRY_COUNTER = 0
+            return response['data']
+        elif response['status'] == 201:
+            # 201's are the return code for resource creations
+            # and the response object can vary, so just return the whole thing
+            # and make the calling function deal with it
+            return response
+        elif response['status'] == 401:
+                # retry up to MAX_UNAUTH_RETRIES
+            if UNAUTH_RETRY_COUNTER < MAX_UNAUTH_RETRIES:
+                retries = MAX_UNAUTH_RETRIES - UNAUTH_RETRY_COUNTER
+                print("Received unauthorized response. Will retry %s more times." % retries)
+                UNAUTH_RETRY_COUNTER += 1
+                api_call(url)
+            else:
+                print("Hit max unauth retries.")
+                return False
+        else:
+            print(response['status'])
+            print("Error calling API: %s\n%s" % (url, response))
+        return False
 
 
 def get_api_endpoint(resource, method):
