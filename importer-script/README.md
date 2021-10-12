@@ -290,7 +290,7 @@ Skip verification of the cloudtamer SSL certificate.
 
 Use this if cloudtamer does not have a valid certificate.
 
-Using this will output a warning message during the import.
+Using this will output a warning message during the import and may affect functionality overall.
 
 Example usage:
 
