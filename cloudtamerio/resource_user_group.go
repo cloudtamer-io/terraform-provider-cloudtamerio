@@ -51,7 +51,7 @@ func resourceUserGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"owner_group": {
+			"owner_groups": {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -86,7 +86,6 @@ func resourceUserGroup() *schema.Resource {
 				},
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 		},
 	}
@@ -100,7 +99,7 @@ func resourceUserGroupCreate(ctx context.Context, d *schema.ResourceData, m inte
 		Description:       d.Get("description").(string),
 		IdmsID:            d.Get("idms_id").(int),
 		Name:              d.Get("name").(string),
-		OwnerUserGroupIds: hc.FlattenGenericIDPointer(d, "owner_group"),
+		OwnerUserGroupIds: hc.FlattenGenericIDPointer(d, "owner_groups"),
 		OwnerUserIds:      hc.FlattenGenericIDPointer(d, "owner_users"),
 		UserIds:           hc.FlattenGenericIDPointer(d, "users"),
 	}
@@ -153,7 +152,7 @@ func resourceUserGroupRead(ctx context.Context, d *schema.ResourceData, m interf
 	data["idms_id"] = item.UserGroup.IdmsID
 	data["name"] = item.UserGroup.Name
 	if hc.InflateObjectWithID(item.OwnerGroup) != nil {
-		data["owner_group"] = hc.InflateObjectWithID(item.OwnerGroup)
+		data["owner_groups"] = hc.InflateObjectWithID(item.OwnerGroup)
 	}
 	if hc.InflateObjectWithID(item.OwnerUsers) != nil {
 		data["owner_users"] = hc.InflateObjectWithID(item.OwnerUsers)
@@ -208,11 +207,41 @@ func resourceUserGroupUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		}
 	}
 
+	// Handle associations.
+	if d.HasChanges("users") {
+		hasChanged++
+		arrAddUserIds, arrRemoveUserIds, _, err := hc.AssociationChanged(d, "users")
+
+		if len(arrAddUserIds) > 0 {
+			_, err = c.POST(fmt.Sprintf("/v3/user-group/%s/user", ID), arrAddUserIds)
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Unable to add owners on UserGroup",
+					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+				})
+				return diags
+			}
+		}
+
+		if len(arrRemoveUserIds) > 0 {
+			err = c.DELETE(fmt.Sprintf("/v3/user-group/%s/user", ID), arrRemoveUserIds)
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Unable to remove owners on UserGroup",
+					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+				})
+				return diags
+			}
+		}
+	}
+
 	// Determine if the owners have changed.
-	if d.HasChanges("owner_group",
+	if d.HasChanges("owner_groups",
 		"owner_users") {
 		hasChanged++
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_group")
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_groups")
 		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, err := hc.AssociationChanged(d, "owner_users")
 
 		if len(arrAddOwnerUserGroupIds) > 0 ||

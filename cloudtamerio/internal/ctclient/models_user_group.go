@@ -47,3 +47,9 @@ type UGroupUpdatable struct {
 	IdmsID      int    `json:"idms_id"`
 	Name        string `json:"name"`
 }
+
+// UserGroupAssociationsAdd for: POST /api/v3/user-group/{id}/user
+type UserGroupAssociationsAdd []int
+
+// UserGroupAssociationsRemove for: DELETE /api/v3/user-group/{id}/user
+type UserGroupAssociationsRemove []int
