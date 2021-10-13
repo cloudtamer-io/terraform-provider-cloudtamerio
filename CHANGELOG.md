@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2021-10-13
+### Added
+- Support creating, updating, and deleting resources for: user groups.
+
 ## [0.1.4] - 2021-08-09
 ### Added
 - Support creating, updating, and deleting resources for: OUs. (Requires cloudtamer.io v2.31.0 or newer)
