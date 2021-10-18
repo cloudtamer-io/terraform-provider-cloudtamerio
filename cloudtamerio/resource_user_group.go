@@ -210,10 +210,10 @@ func resourceUserGroupUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	// Handle associations.
 	if d.HasChanges("users") {
 		hasChanged++
-		arrAddUserIds, arrRemoveUserIds, _, err := hc.AssociationChanged(d, "users")
+		arrAddUserIds, arrRemoveUserIds, _, _ := hc.AssociationChanged(d, "users")
 
 		if len(arrAddUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/user-group/%s/user", ID), arrAddUserIds)
+			_, err := c.POST(fmt.Sprintf("/v3/user-group/%s/user", ID), arrAddUserIds)
 			if err != nil {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
@@ -225,7 +225,7 @@ func resourceUserGroupUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		}
 
 		if len(arrRemoveUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/user-group/%s/user", ID), arrRemoveUserIds)
+			err := c.DELETE(fmt.Sprintf("/v3/user-group/%s/user", ID), arrRemoveUserIds)
 			if err != nil {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
@@ -241,12 +241,12 @@ func resourceUserGroupUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	if d.HasChanges("owner_groups",
 		"owner_users") {
 		hasChanged++
-		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, err := hc.AssociationChanged(d, "owner_groups")
-		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, err := hc.AssociationChanged(d, "owner_users")
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, _ := hc.AssociationChanged(d, "owner_groups")
+		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, _ := hc.AssociationChanged(d, "owner_users")
 
 		if len(arrAddOwnerUserGroupIds) > 0 ||
 			len(arrAddOwnerUserIds) > 0 {
-			_, err = c.POST(fmt.Sprintf("/v3/user-group/%s/owner", ID), hc.ChangeOwners{
+			_, err := c.POST(fmt.Sprintf("/v3/user-group/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
 				OwnerUserIds:      &arrAddOwnerUserIds,
 			})
@@ -262,7 +262,7 @@ func resourceUserGroupUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 		if len(arrRemoveOwnerUserGroupIds) > 0 ||
 			len(arrRemoveOwnerUserIds) > 0 {
-			err = c.DELETE(fmt.Sprintf("/v3/user-group/%s/owner", ID), hc.ChangeOwners{
+			err := c.DELETE(fmt.Sprintf("/v3/user-group/%s/owner", ID), hc.ChangeOwners{
 				OwnerUserGroupIds: &arrRemoveOwnerUserGroupIds,
 				OwnerUserIds:      &arrRemoveOwnerUserIds,
 			})
