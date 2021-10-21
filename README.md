@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.4"
+      version = "0.1.5"
     }
   }
 }
@@ -248,7 +248,7 @@ resource "cloudtamerio_cloud_rule" "cr1" {
 }
 
 # Output the ID of the resource created.
-output "check_id" {
+output "rule_id" {
   value = cloudtamerio_cloud_rule.cr1.id
 }
 ```
@@ -311,6 +311,24 @@ resource "cloudtamerio_ou" "ou1" {
 # Output the ID of the resource created.
 output "ou_id" {
   value = cloudtamerio_ou.ou1.id
+}
+```
+
+```hcl
+# Create a User Group.
+
+resource "cloudtamerio_user_group" "ug1" {
+  name        = "sample-user-group2"
+  description = "This is a sample user group."
+  idms_id     = 1
+  owner_groups { id = 1 }
+  owner_users { id = 1 }
+  users { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "user_group_id" {
+  value = cloudtamerio_user_group.ug1.id
 }
 ```
 
