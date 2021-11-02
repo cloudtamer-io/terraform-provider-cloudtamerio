@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.5"
+      version = "0.1.6"
     }
   }
 }
@@ -329,6 +329,23 @@ resource "cloudtamerio_user_group" "ug1" {
 # Output the ID of the resource created.
 output "user_group_id" {
   value = cloudtamerio_user_group.ug1.id
+}
+```
+
+```hcl
+# Create an association between a User Group and a SAML IDMS.
+
+resource "cloudtamerio_saml_group_association" "sa1" {
+  assertion_name         = "memberOf"
+  assertion_regex        = "^cloudtamer-admins"
+  idms_id                = 5
+  update_on_login        = true
+  user_group_id          = 1
+}
+
+# Output the ID of the resource created.
+output "saml_group_assocation_id" {
+  value = cloudtamerio_saml_group_association.sa1.id
 }
 ```
 

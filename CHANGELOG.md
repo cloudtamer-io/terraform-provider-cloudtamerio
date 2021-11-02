@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2021-10-25
+### Added
+- Support creating, updating, and deleting resources for: SAML IDMS user group associations.
+
 ## [0.1.5] - 2021-10-13
 ### Added
 - Support creating, updating, and deleting resources for: user groups.
