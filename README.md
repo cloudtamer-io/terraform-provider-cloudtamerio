@@ -316,7 +316,6 @@ output "ou_id" {
 
 ```hcl
 # Create a User Group.
-
 resource "cloudtamerio_user_group" "ug1" {
   name        = "sample-user-group2"
   description = "This is a sample user group."
@@ -334,7 +333,6 @@ output "user_group_id" {
 
 ```hcl
 # Create an association between a User Group and a SAML IDMS.
-
 resource "cloudtamerio_saml_group_association" "sa1" {
   assertion_name         = "memberOf"
   assertion_regex        = "^cloudtamer-admins"
@@ -346,6 +344,29 @@ resource "cloudtamerio_saml_group_association" "sa1" {
 # Output the ID of the resource created.
 output "saml_group_assocation_id" {
   value = cloudtamerio_saml_group_association.sa1.id
+}
+```
+
+```hcl
+# Create a Project.
+resource "cloudtamerio_project" "p1" {
+  ou_id = 1
+  name = "Tech Project I"
+  description = "This is a sample project."
+  permission_scheme_id = 3
+  owner_user_ids { id = 1 }
+  project_funding { 
+    amount = 1000
+    funding_order = 1
+    funding_source_id = 1
+    start_datecode = "2021-01"
+    end_datecode = "2022-01"
+  }
+}
+
+# Output the ID of the resource created.
+output "project_id" {
+  value = cloudtamerio_project.p1.id
 }
 ```
 
