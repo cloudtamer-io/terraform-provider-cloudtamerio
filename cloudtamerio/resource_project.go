@@ -90,28 +90,32 @@ func resourceProject() *schema.Resource {
 						"amount": {
 							Type:     schema.TypeFloat,
 							Optional: true,
+							ForceNew: true, // Not allowed to be changed, forces new item if changed.
 						},
 						"funding_order": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							ForceNew: true, // Not allowed to be changed, forces new item if changed.
 						},
 						"funding_source_id": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							ForceNew: true, // Not allowed to be changed, forces new item if changed.
 						},
 						"start_datecode": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true, // Not allowed to be changed, forces new item if changed.
 						},
 						"end_datecode": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true, // Not allowed to be changed, forces new item if changed.
 						},
 					},
 				},
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 		},
 	}
