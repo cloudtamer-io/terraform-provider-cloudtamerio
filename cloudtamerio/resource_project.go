@@ -256,6 +256,32 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
+	// Determine if the owners have changed.
+	if d.HasChanges("owner_user_ids",
+		"owner_user_group_ids") {
+		hasChanged++
+		arrAddOwnerUserGroupIds, arrRemoveOwnerUserGroupIds, _, _ := hc.AssociationChanged(d, "owner_user_group_ids")
+		arrAddOwnerUserIds, arrRemoveOwnerUserIds, _, _ := hc.AssociationChanged(d, "owner_user_ids")
+
+		if len(arrAddOwnerUserGroupIds) > 0 ||
+			len(arrAddOwnerUserIds) > 0 ||
+			len(arrRemoveOwnerUserGroupIds) > 0 ||
+			len(arrRemoveOwnerUserIds) > 0 {
+			_, err := c.POST(fmt.Sprintf("/v1/project/%s/owner", ID), hc.ChangeOwners{
+				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
+				OwnerUserIds:      &arrAddOwnerUserIds,
+			})
+			if err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Unable to change owners on Project",
+					Detail:   fmt.Sprintf("Error: %v\nItem: %v", err.Error(), ID),
+				})
+				return diags
+			}
+		}
+	}
+
 	if hasChanged > 0 {
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
