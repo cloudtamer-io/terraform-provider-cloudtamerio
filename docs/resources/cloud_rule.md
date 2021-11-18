@@ -28,6 +28,7 @@ description: |-
 - **azure_role_definitions** (Block List) (see [below for nested schema](#nestedblock--azure_role_definitions))
 - **compliance_standards** (Block List) (see [below for nested schema](#nestedblock--compliance_standards))
 - **description** (String)
+- **gcp_iam_roles** (Block List) (see [below for nested schema](#nestedblock--gcp_iam_roles))
 - **id** (String) The ID of this resource.
 - **internal_aws_amis** (Block List) (see [below for nested schema](#nestedblock--internal_aws_amis))
 - **internal_aws_service_catalog_portfolios** (Block List) (see [below for nested schema](#nestedblock--internal_aws_service_catalog_portfolios))
@@ -86,6 +87,14 @@ Optional:
 
 <a id="nestedblock--compliance_standards"></a>
 ### Nested Schema for `compliance_standards`
+
+Optional:
+
+- **id** (Number) The ID of this resource.
+
+
+<a id="nestedblock--gcp_iam_roles"></a>
+### Nested Schema for `gcp_iam_roles`
 
 Optional:
 
