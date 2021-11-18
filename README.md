@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.7"
+      version = "0.1.8"
     }
   }
 }
