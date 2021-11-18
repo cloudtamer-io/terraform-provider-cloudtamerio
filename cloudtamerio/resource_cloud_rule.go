@@ -91,6 +91,18 @@ func resourceCloudRule() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 			},
+			"gcp_iam_roles": {
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+				Type:     schema.TypeList,
+				Optional: true,
+			},
 			"built_in": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -222,6 +234,7 @@ func resourceCloudRuleCreate(ctx context.Context, d *schema.ResourceData, m inte
 		CftIds:                        hc.FlattenGenericIDPointer(d, "aws_cloudformation_templates"),
 		ComplianceStandardIds:         hc.FlattenGenericIDPointer(d, "compliance_standards"),
 		Description:                   d.Get("description").(string),
+		GcpIamRoleIds:                 hc.FlattenGenericIDPointer(d, "gcp_iam_roles"),
 		IamPolicyIds:                  hc.FlattenGenericIDPointer(d, "aws_iam_policies"),
 		InternalAmiIds:                hc.FlattenGenericIDPointer(d, "internal_aws_amis"),
 		InternalPortfolioIds:          hc.FlattenGenericIDPointer(d, "internal_aws_service_catalog_portfolios"),
@@ -299,6 +312,9 @@ func resourceCloudRuleRead(ctx context.Context, d *schema.ResourceData, m interf
 	data["description"] = item.CloudRule.Description
 	if hc.InflateObjectWithID(item.InternalAwsAmis) != nil {
 		data["internal_aws_amis"] = hc.InflateObjectWithID(item.InternalAwsAmis)
+	}
+	if hc.InflateObjectWithID(item.GCPIAMRoles) != nil {
+		data["gcp_iam_roles"] = hc.InflateObjectWithID(item.GCPIAMRoles)
 	}
 	if hc.InflateObjectWithID(item.InternalAwsServiceCatalogPortfolios) != nil {
 		data["internal_aws_service_catalog_portfolios"] = hc.InflateObjectWithID(item.InternalAwsServiceCatalogPortfolios)
@@ -385,7 +401,8 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		"internal_aws_service_catalog_portfolios",
 		"ous",
 		"projects",
-		"service_control_policies") {
+		"service_control_policies",
+		"gcp_iam_roles") {
 		hasChanged++
 		arrAddAzureArmTemplateDefinitionIds, arrRemoveAzureArmTemplateDefinitionIds, _, _ := hc.AssociationChanged(d, "azure_arm_template_definitions")
 		arrAddAzurePolicyDefinitionIds, arrRemoveAzurePolicyDefinitionIds, _, _ := hc.AssociationChanged(d, "azure_policy_definitions")
@@ -398,12 +415,14 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		arrAddOUIds, arrRemoveOUIds, _, _ := hc.AssociationChanged(d, "ous")
 		arrAddProjectIds, arrRemoveProjectIds, _, _ := hc.AssociationChanged(d, "projects")
 		arrAddServiceControlPolicyIds, arrRemoveServiceControlPolicyIds, _, _ := hc.AssociationChanged(d, "service_control_policies")
+		arrAddGcpIamRoleIds, arrRemoveGcpIamRoleIds, _, _ := hc.AssociationChanged(d, "gcp_iam_roles")
 
 		if len(arrAddAzureArmTemplateDefinitionIds) > 0 ||
 			len(arrAddAzurePolicyDefinitionIds) > 0 ||
 			len(arrAddAzureRoleDefinitionIds) > 0 ||
 			len(arrAddCftIds) > 0 ||
 			len(arrAddComplianceStandardIds) > 0 ||
+			len(arrAddGcpIamRoleIds) > 0 ||
 			len(arrAddIamPolicyIds) > 0 ||
 			len(arrAddInternalAmiIds) > 0 ||
 			len(arrAddInternalPortfolioIds) > 0 ||
@@ -416,6 +435,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				AzureRoleDefinitionIds:        &arrAddAzureRoleDefinitionIds,
 				CftIds:                        &arrAddCftIds,
 				ComplianceStandardIds:         &arrAddComplianceStandardIds,
+				GcpIamRoleIds:                 &arrAddGcpIamRoleIds,
 				IamPolicyIds:                  &arrAddIamPolicyIds,
 				InternalAmiIds:                &arrAddInternalAmiIds,
 				InternalPortfolioIds:          &arrAddInternalPortfolioIds,
@@ -438,6 +458,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			len(arrRemoveAzureRoleDefinitionIds) > 0 ||
 			len(arrRemoveCftIds) > 0 ||
 			len(arrRemoveComplianceStandardIds) > 0 ||
+			len(arrRemoveGcpIamRoleIds) > 0 ||
 			len(arrRemoveIamPolicyIds) > 0 ||
 			len(arrRemoveInternalAmiIds) > 0 ||
 			len(arrRemoveInternalPortfolioIds) > 0 ||
@@ -450,6 +471,7 @@ func resourceCloudRuleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				AzureRoleDefinitionIds:        &arrRemoveAzureRoleDefinitionIds,
 				CftIds:                        &arrRemoveCftIds,
 				ComplianceStandardIds:         &arrRemoveComplianceStandardIds,
+				GcpIamRoleIds:                 &arrRemoveGcpIamRoleIds,
 				IamPolicyIds:                  &arrRemoveIamPolicyIds,
 				InternalAmiIds:                &arrRemoveInternalAmiIds,
 				InternalPortfolioIds:          &arrRemoveInternalPortfolioIds,
