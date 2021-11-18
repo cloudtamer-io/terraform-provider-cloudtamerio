@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - 2021-11-18
+### Added
+- Support creating, updating, and deleting resources for: Google Cloud IAM Roles.
+- Support adding and removing Google Cloud IAM Roles on Project and OU Cloud Rules.
+- Fix several requests that use the wrong user & user group IDs to remove owners from a resource.
+
 ## [0.1.7] - 2021-11-11
 ### Added
 - Support creating, updating, and deleting resources for: Projects

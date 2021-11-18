@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.7"
+      version = "0.1.8"
     }
   }
 }
@@ -367,6 +367,22 @@ resource "cloudtamerio_project" "p1" {
 # Output the ID of the resource created.
 output "project_id" {
   value = cloudtamerio_project.p1.id
+}
+```
+
+```hcl
+# Create a GCP IAM role.
+resource "cloudtamerio_gcp_iam_role" "gr1" {
+  name = "Read permissions"
+  description = "Allow user to list & get IAM roles."
+  role_permissions = ["iam.roles.get", "iam.roles.list"]
+  gcp_role_launch_stage = 4
+  owner_users { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "gcp_role" {
+  value = cloudtamerio_gcp_iam_role.gr1.id
 }
 ```
 

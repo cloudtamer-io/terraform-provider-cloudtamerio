@@ -226,8 +226,8 @@ func resourceOUUpdate(ctx context.Context, d *schema.ResourceData, m interface{}
 		if len(arrRemoveOwnerUserGroupIds) > 0 ||
 			len(arrRemoveOwnerUserIds) > 0 {
 			err := c.DELETE(fmt.Sprintf("/v3/ou/%s/owner", ID), hc.ChangeOwners{
-				OwnerUserGroupIds: &arrAddOwnerUserGroupIds,
-				OwnerUserIds:      &arrAddOwnerUserIds,
+				OwnerUserGroupIds: &arrRemoveOwnerUserGroupIds,
+				OwnerUserIds:      &arrRemoveOwnerUserIds,
 			})
 			if err != nil {
 				diags = append(diags, diag.Diagnostic{

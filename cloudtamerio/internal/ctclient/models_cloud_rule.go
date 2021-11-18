@@ -30,6 +30,7 @@ type CloudRuleResponse struct {
 			PreWebhookID  *int   `json:"pre_webhook_id"`
 		} `json:"cloud_rule"`
 		ComplianceStandards                 []ObjectWithID `json:"compliance_standards"`
+		GCPIAMRoles                         []ObjectWithID `json:"gcp_iam_roles"`
 		InternalAwsAmis                     []ObjectWithID `json:"internal_aws_amis"`
 		InternalAwsServiceCatalogPortfolios []ObjectWithID `json:"internal_aws_service_catalog_portfolios"`
 		OUs                                 []ObjectWithID `json:"ous"`
@@ -49,6 +50,7 @@ type CloudRuleCreate struct {
 	CftIds                        *[]int `json:"cft_ids"`
 	ComplianceStandardIds         *[]int `json:"compliance_standard_ids"`
 	Description                   string `json:"description"`
+	GcpIamRoleIds                 *[]int `json:"gcp_iam_role_ids"`
 	IamPolicyIds                  *[]int `json:"iam_policy_ids"`
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
@@ -77,6 +79,7 @@ type CloudRuleAssociationsAdd struct {
 	AzureRoleDefinitionIds        *[]int `json:"azure_role_definition_ids"`
 	CftIds                        *[]int `json:"cft_ids"`
 	ComplianceStandardIds         *[]int `json:"compliance_standard_ids"`
+	GcpIamRoleIds                 *[]int `json:"gcp_iam_role_ids"`
 	IamPolicyIds                  *[]int `json:"iam_policy_ids"`
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
@@ -92,6 +95,7 @@ type CloudRuleAssociationsRemove struct {
 	AzureRoleDefinitionIds        *[]int `json:"azure_role_definition_ids"`
 	CftIds                        *[]int `json:"cft_ids"`
 	ComplianceStandardIds         *[]int `json:"compliance_standard_ids"`
+	GcpIamRoleIds                 *[]int `json:"gcp_iam_role_ids"`
 	IamPolicyIds                  *[]int `json:"iam_policy_ids"`
 	InternalAmiIds                *[]int `json:"internal_ami_ids"`
 	InternalPortfolioIds          *[]int `json:"internal_portfolio_ids"`
