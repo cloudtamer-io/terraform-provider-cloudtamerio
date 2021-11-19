@@ -1,14 +1,14 @@
-# terraform-provider-cloudtamerio
+# terraform-provider-cloudtamerio <!-- omit in toc -->
 
 The Terraform provider for cloudtamer.io allows you interact with the cloudtamer.io API using the Terraform HCL language. Our provider supports creating, updating, reading, and deleting resources. You can also use it to query for resources using filters even if a resource is not created through Terraform.
 
-- [terraform-provider-cloudtamerio](#terraform-provider-cloudtamerio)
-  - [Getting Started](#getting-started)
-    - [Importing Resource State](#importing-resource-state)
-  - [Sample Commands](#sample-commands)
-    - [Resources](#resources)
-    - [Data Sources](#data-sources)
-    - [Locals](#locals)
+- [Getting Started](#getting-started)
+  - [Importing Resource State](#importing-resource-state)
+- [Sample Commands](#sample-commands)
+  - [Resources](#resources)
+  - [Data Sources](#data-sources)
+  - [Locals](#locals)
+- [Repository Maintainer: Push to Terraform Registry](#repository-maintainer-push-to-terraform-registry)
 
 ## Getting Started
 
@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.1.8"
+      version = "0.2.0"
     }
   }
 }
@@ -502,4 +502,16 @@ locals {
 output "policy_owner_users" {
   value = local.owners
 }
+```
+
+## Repository Maintainer: Push to Terraform Registry
+
+To push a new version of this provider to the Terraform Registry:
+
+- In the main branch, update the Makefile with the correct version
+- Use the commands below to create a new tag (ensure you change the version number and description):
+
+```bash
+git tag -a v0.2.0 -m "Add your description here"
+git push origin v0.2.0
 ```

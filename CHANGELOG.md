@@ -2,23 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.8] - 2021-11-18
-### Added
-- Support creating, updating, and deleting resources for: Google Cloud IAM Roles.
-- Support adding and removing Google Cloud IAM Roles on Project and OU Cloud Rules.
-- Fix several requests that use the wrong user & user group IDs to remove owners from a resource.
-
-## [0.1.7] - 2021-11-11
-### Added
-- Support creating, updating, and deleting resources for: Projects
-
-## [0.1.6] - 2021-10-25
-### Added
-- Support creating, updating, and deleting resources for: SAML IDMS user group associations.
-
-## [0.1.5] - 2021-10-13
+## [0.2.0] - 2021-11-19
 ### Added
 - Support creating, updating, and deleting resources for: user groups.
+- Support creating, updating, and deleting resources for: SAML IDMS user group associations.
+- Support creating, updating, and deleting resources for: Projects
+- Support creating, updating, and deleting resources for: Google Cloud IAM Roles.
+- Support adding and removing Google Cloud IAM Roles on Project and OU Cloud Rules.
+
+### Changed
+- Fix several requests that use the wrong user & user group IDs to remove owners from a resource.
 
 ## [0.1.4] - 2021-08-09
 ### Added
@@ -33,7 +26,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support creating, updating, and deleting resources for: OU cloud access roles and project cloud access roles.
 
-## Changed
+### Changed
 - Fix bug on compliance standard creation so compliance checks are attached during creation instead of requiring another `terraform apply`.
 - Fix bug on cloud rule creation so associated items are attached during creation instead of requiring another `terraform apply`.
 
