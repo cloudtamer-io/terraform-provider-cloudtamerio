@@ -17,23 +17,31 @@ description: |-
 
 ### Required
 
-- **gcp_role_launch_stage** (Number)
-- **name** (String)
-- **role_permissions** (List of String)
+- **gcp_role_launch_stage** (Number) Launch stage for the GCP role.
+
+	1 - The alpha launch stage for a GCP role
+
+	2 - The beta launch stage for a GCP role
+
+	3 - The general availability launch stage for a GCP role
+
+	4 - The disabled launch stage for a GCP role
+
+- **name** (String) Name of the Role Definition in the application and in GCP.
+- **role_permissions** (List of String) Array of permission strings for the GCP Role.
 
 ### Optional
 
-- **description** (String)
+- **description** (String) Description for the Role Definition in the application and GCP.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
-- **system_managed_policy** (Boolean)
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of group IDs who will own the GCP Role. Is required if no owner user IDs are listed.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the GCP Role. Is required if no owner group IDs are listed.
+- **system_managed_policy** (Boolean) True if the policy comes packaged with cloudtamer.io.
 
 ### Read-only
 
-- **gcp_id** (String)
-- **gcp_managed_policy** (Boolean)
+- **gcp_id** (String) ID of the record in GCP.
+- **gcp_managed_policy** (Boolean) True if the policy is created and managed by GCP.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`

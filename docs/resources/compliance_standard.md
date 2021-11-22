@@ -17,22 +17,21 @@ description: |-
 
 ### Required
 
-- **created_by_user_id** (Number)
-- **name** (String)
+- **created_by_user_id** (Number) The ID of the User who created the Compliance Standard.
+- **name** (String) Name of the Compliance Standard.
 
 ### Optional
 
 - **compliance_checks** (Block List) (see [below for nested schema](#nestedblock--compliance_checks))
-- **description** (String)
+- **description** (String) Description for the Compliance Standard.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of groups IDs who will own the Compliance Standard. Is required if no owner user IDs are listed.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the Compliance Standard. Is required if no owner group IDs are listed.
 
 ### Read-only
 
-- **created_at** (String)
-- **ct_managed** (Boolean)
+- **created_at** (String) Date when the Compliance Standard was added to the application.
+- **ct_managed** (Boolean) Managed signifies that this compliance standard is managed by cloudtamer.io.
 
 <a id="nestedblock--compliance_checks"></a>
 ### Nested Schema for `compliance_checks`

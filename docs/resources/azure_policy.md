@@ -18,18 +18,17 @@ description: |-
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs that will be owners of the azure policy.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs that will be owners of the azure policy.
 
 ### Read-only
 
-- **azure_managed_policy_def_id** (String)
-- **ct_managed** (Boolean)
-- **description** (String)
-- **name** (String)
-- **parameters** (String)
-- **policy** (String)
+- **azure_managed_policy_def_id** (String) ID of the policy in Azure if this policy definition is managed by Azure.
+- **ct_managed** (Boolean) Managed signifies that this policy definition is managed by cloudtamer.io
+- **description** (String) The human-readable description of the policy.
+- **name** (String) Human-readable name of the Azure Policy Definition.
+- **parameters** (String) The parameters for the policy.
+- **policy** (String) The JSON for the policy.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`

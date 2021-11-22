@@ -17,17 +17,16 @@ description: |-
 
 ### Optional
 
-- **assertion_name** (String)
-- **assertion_regex** (String)
+- **assertion_name** (String) AssertionName of the assertion in SAML.
+- **assertion_regex** (String) Regular expression used to determine a match.
 - **id** (String) The ID of this resource.
-- **idms_id** (Number)
-- **last_updated** (String)
-- **update_on_login** (Boolean)
-- **user_group_id** (Number)
+- **idms_id** (Number) ID of the IDMS the group association applies to.
+- **update_on_login** (Boolean) If the group associations should be updated every time a user logs in.
+- **user_group_id** (Number) ID of the user group this assertion will map to.
 
 ### Read-only
 
-- **idms_saml_id** (Number)
-- **should_update_on_login** (Boolean)
+- **idms_saml_id** (Number) ID of the saml idms the group association applies to.
+- **should_update_on_login** (Boolean) If the group associations should be updated every time a user logs in.
 
 
