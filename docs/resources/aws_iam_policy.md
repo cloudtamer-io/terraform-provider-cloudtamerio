@@ -22,10 +22,10 @@ description: |-
 
 ### Optional
 
-- **aws_iam_path** (String) Text of the IAM Path in AWS to be stored in AWS.
+- **aws_iam_path** (String) Path for the IAM policy (defaults to "/").
 - **description** (String) Description for the IAM policy.
 - **id** (String) The ID of this resource.
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of groups IDs who will own the iam policy. Is required if no owner user IDs are listed.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the IAM policy. Is required if no owner user IDs are listed.
 - **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the iam policy. Is required if no owner group IDs are listed.
 
 ### Read-only

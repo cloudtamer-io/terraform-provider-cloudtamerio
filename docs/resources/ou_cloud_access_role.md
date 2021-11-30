@@ -27,11 +27,11 @@ description: |-
 - **aws_iam_permissions_boundary** (Number) ID of the AWS IAM policy to be used as a permissions boundary for this role.
 - **aws_iam_policies** (Block List) (see [below for nested schema](#nestedblock--aws_iam_policies)) IDs of the AWS IAM policies attached to this role.
 - **id** (String) The ID of this resource.
-- **long_term_access_keys** (Boolean) If long term access is true, users of this cloud access role can generate aws long-term access keys. Will default to false if not set.
-- **short_term_access_keys** (Boolean) If short term access is true, users of this cloud access role can generate short-term access keys. Will default to false if not set.
-- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups)) IDs of the user groups allowed to use this role to access the AWS console.
-- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users allowed to use this role to access the AWS console.
-- **web_access** (Boolean) If web access is true, users of this cloud access role can log into the console. Will default to false if not set.
+- **long_term_access_keys** (Boolean) If long term access is true, users of this cloud access role can generate long-term AWS access keys (as defined in the application). Will default to false if not set.
+- **short_term_access_keys** (Boolean) If short term access is true, users of this cloud access role can generate short-term AWS access keys (as defined in the application). Will default to false if not set.
+- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups)) IDs of the user groups allowed to use this role.
+- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users allowed to use this role.
+- **web_access** (Boolean) If web access is true, users of this cloud access role can log into the AWS web console. Will default to false if not set.
 
 <a id="nestedblock--aws_iam_policies"></a>
 ### Nested Schema for `aws_iam_policies`

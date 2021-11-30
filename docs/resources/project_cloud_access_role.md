@@ -24,18 +24,18 @@ description: |-
 ### Optional
 
 - **accounts** (Block List) (see [below for nested schema](#nestedblock--accounts)) IDs of accounts on a project that will be accessible via this cloud access role.
-- **apply_to_all_accounts** (Boolean) If apply all accounts is true, this cloud access role will be applied to all accounts under the project.
-- **aws_iam_path** (String) Text of the IAM Path in AWS to be stored in AWS.
+- **apply_to_all_accounts** (Boolean) If true, this cloud access role will be applied to all accounts under the project.
+- **aws_iam_path** (String) AWS IAM Path for the Cloud Access role (defaults to "/").
 - **aws_iam_permissions_boundary** (Number) ID of the AWS IAM policy to be used as a permissions boundary for this role.
 - **aws_iam_policies** (Block List) (see [below for nested schema](#nestedblock--aws_iam_policies)) IDs of the AWS IAM policies attached to this role.
 - **azure_role_definitions** (Block List) (see [below for nested schema](#nestedblock--azure_role_definitions)) IDs of the Azure Role Definitions attached to this role.
-- **future_accounts** (Boolean) If future accounts is true, this cloud access role will be added to any account that is added to this project.
+- **future_accounts** (Boolean) If true, this cloud access role will be added to any account that is added to this project.
 - **id** (String) The ID of this resource.
-- **long_term_access_keys** (Boolean) If long term key access is true, users of this cloud access role can generate aws long-term access keys.
-- **short_term_access_keys** (Boolean) If short term key access is true, users of this cloud access role can generate short-term access keys.
-- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups)) IDs of the user groups allowed to use this role to access the AWS console.
-- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users allowed to use this role to access the AWS console.
-- **web_access** (Boolean) If web access is true, users of this cloud access role can log into the console. ill default to false if not set.
+- **long_term_access_keys** (Boolean) If long term key access is true, users of this cloud access role can generate long-term AWS access keys (as defined in the application).
+- **short_term_access_keys** (Boolean) If short term key access is true, users of this cloud access role can generate short-term AWS access keys (as defined in the application).
+- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups)) IDs of the user groups allowed to use this role.
+- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users allowed to use this role.
+- **web_access** (Boolean) If web access is true, users of this cloud access role can log into the AWS web console. Will default to false if not set.
 
 <a id="nestedblock--accounts"></a>
 ### Nested Schema for `accounts`

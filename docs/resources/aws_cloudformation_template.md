@@ -23,9 +23,9 @@ description: |-
 
 ### Optional
 
-- **description** (String) Description of the Cloudformation template.
+- **description** (String) Description of the CloudFormation template.
 - **id** (String) The ID of this resource.
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of groups IDs who will own the CloudFormation template. Is required if no user IDs are listed.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the CloudFormation template. Is required if no user IDs are listed.
 - **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the CloudFormation template. Is required if no group IDs are listed.
 - **region** (String) DEPRECATED! USE THE regions FIELD.
 
