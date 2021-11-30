@@ -34,7 +34,7 @@ description: |-
 
 - **description** (String) Description for the Role Definition in the application and GCP.
 - **id** (String) The ID of this resource.
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of group IDs who will own the GCP Role. Is required if no owner user IDs are listed.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the GCP Role. Is required if no owner user IDs are listed.
 - **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the GCP Role. Is required if no owner group IDs are listed.
 - **system_managed_policy** (Boolean) True if the policy comes packaged with cloudtamer.io.
 

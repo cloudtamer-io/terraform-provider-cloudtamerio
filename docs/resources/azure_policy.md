@@ -18,7 +18,7 @@ description: |-
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs that will be owners of the azure policy.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs that will be owners of the Azure policy.
 - **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs that will be owners of the azure policy.
 
 ### Read-only

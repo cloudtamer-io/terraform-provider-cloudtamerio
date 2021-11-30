@@ -25,15 +25,15 @@ description: |-
 ### Optional
 
 - **auto_pay** (Boolean) True if the application can use the spend plan to process payments from the account.
-- **default_aws_region** (String) Default AWS region that the project will use for assuming into accounts.
+- **default_aws_region** (String) Default AWS region that will be used when federating into the project's accounts.
 - **description** (String) Description for the project.
 - **id** (String) The ID of this resource.
-- **owner_user_group_ids** (Block List) (see [below for nested schema](#nestedblock--owner_user_group_ids)) List of groups IDs who will own the project. Is required if no owner user IDs are listed.
+- **owner_user_group_ids** (Block List) (see [below for nested schema](#nestedblock--owner_user_group_ids)) List of user group IDs who will own the project. Is required if no owner user IDs are listed.
 - **owner_user_ids** (Block List) (see [below for nested schema](#nestedblock--owner_user_ids)) List of user IDs who will own the project. Is required if no owner group IDs are listed.
 
 ### Read-only
 
-- **archived** (Boolean) True is the project is archived, false if the project is active.
+- **archived** (Boolean) True if the project is archived, false if the project is active.
 
 <a id="nestedblock--project_funding"></a>
 ### Nested Schema for `project_funding`

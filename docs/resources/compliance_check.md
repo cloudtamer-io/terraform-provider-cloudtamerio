@@ -49,9 +49,9 @@ description: |-
     4 - days
 
 - **id** (String) The ID of this resource.
-- **is_all_regions** (Boolean) Determines if the check should be applied to all regions applied on the system.
+- **is_all_regions** (Boolean) Determines if the check should be applied to all regions enabled in the application.
 - **is_auto_archived** (Boolean) Whether existing findings should be archived before new findings are reported.
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of groups IDs who will own the Compliance Check. Is required if no owner user IDs are listed.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the Compliance Check. Is required if no owner user IDs are listed.
 - **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the Compliance Check. Is required if no owner group IDs are listed.
 - **regions** (List of String) List of the AWS regions where the compliance check applies.
 - **severity_type_id** (Number) The severity level of the compliance check.

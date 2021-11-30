@@ -18,7 +18,7 @@ description: |-
 ### Required
 
 - **name** (String) Name of the IAM policy.
-- **policy** (String) Text of the IAM policy in AWS to be stored in AWS.
+- **policy** (String) Policy body for the IAM policy.
 
 ### Optional
 
