@@ -24,7 +24,7 @@ description: |-
 ### Read-only
 
 - **azure_managed_policy_def_id** (String) ID of the policy in Azure if this policy definition is managed by Azure.
-- **ct_managed** (Boolean) Managed signifies that this policy definition is managed by cloudtamer.io
+- **ct_managed** (Boolean) Managed signifies that this policy definition is managed by cloudtamer.io.
 - **description** (String) The human-readable description of the policy.
 - **name** (String) Human-readable name of the Azure policy definition.
 - **parameters** (String) The parameters for the policy.

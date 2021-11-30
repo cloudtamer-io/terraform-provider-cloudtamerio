@@ -32,7 +32,7 @@ description: |-
 
 - **aws_managed_policy** (Boolean) True if the policy is created and managed by AWS.
 - **path_suffix** (String) Name of the IAM policy in AWS, as referenced in its ARN.
-- **system_managed_policy** (Boolean) True if the policy comes packaged with cloudtamer.io
+- **system_managed_policy** (Boolean) True if the policy comes packaged with cloudtamer.io.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`

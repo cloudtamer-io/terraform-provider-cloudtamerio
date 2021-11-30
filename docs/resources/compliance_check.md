@@ -40,7 +40,7 @@ description: |-
 - **body** (String) Body of the Compliance Check defining what actions will be run.
 - **description** (String) Description for the Compliance Check.
 - **frequency_minutes** (Number) How often the check will be run.
-- **frequency_type_id** (Number) The duration type of the frequency it will be checked
+- **frequency_type_id** (Number) The duration type of the frequency it will be checked.
 
     2 - minutes
 
@@ -67,8 +67,8 @@ description: |-
 ### Read-only
 
 - **created_at** (String) Date when the Compliance Check was added to the application.
-- **ct_managed** (Boolean) Whether or not this compliance check is managed by cloudtamer.io
-- **last_scan_id** (Number) ID of the latest scan
+- **ct_managed** (Boolean) Whether or not this compliance check is managed by cloudtamer.io.
+- **last_scan_id** (Number) ID of the latest scan.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`
