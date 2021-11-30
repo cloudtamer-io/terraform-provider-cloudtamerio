@@ -39,14 +39,22 @@ description: |-
 - **azure_policy_id** (Number) The ID of the Azure Policy that this compliance check represents. Only present for Azure Policy compliance checks.
 - **body** (String) Body of the Compliance Check defining what actions will be run.
 - **description** (String) Description for the Compliance Check.
-- **frequency_minutes** (Number) How often the check will be run.
-- **frequency_type_id** (Number) The duration type of the frequency it will be checked.
+- **frequency_minutes** (Number) How often the check will be run, based on the specified frequency type below.
+- **frequency_type_id** (Number) The duration type of the frequency_minutes field.
+
+    1 - seconds
 
     2 - minutes
 
     3 - hours
 
     4 - days
+
+    5 - weeks
+
+    6 - months
+
+    7 - years
 
 - **id** (String) The ID of this resource.
 - **is_all_regions** (Boolean) Determines if the check should be applied to all regions enabled in the application.
