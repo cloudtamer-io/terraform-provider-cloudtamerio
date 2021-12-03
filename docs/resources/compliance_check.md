@@ -17,32 +17,66 @@ description: |-
 
 ### Required
 
-- **cloud_provider_id** (Number)
-- **compliance_check_type_id** (Number)
-- **created_by_user_id** (Number)
-- **name** (String)
+- **cloud_provider_id** (Number) ID of the Cloud Provider for the Compliance Check.
+
+    1 - AWS.
+
+    2 - Microsoft.
+
+- **compliance_check_type_id** (Number) The type of Compliance Check.
+
+    1 - External. These checks are not triggered by cloudtamer.io, but rather can display findings from checks run outside of cloudtamer.io.
+
+    2 - Cloud Custodian. These checks are run by cloudtamer.io using Cloud Custodian.
+
+    3 - Azure Policy. These checks are scraped from Azure's policy reporting engine and apply Azure Policies to accounts.
+
+- **created_by_user_id** (Number) The user who created the Compliance Check.
+- **name** (String) Name of the Compliance Check.
 
 ### Optional
 
-- **azure_policy_id** (Number)
-- **body** (String)
-- **description** (String)
-- **frequency_minutes** (Number)
-- **frequency_type_id** (Number)
+- **azure_policy_id** (Number) The ID of the Azure Policy that this compliance check represents. Only present for Azure Policy compliance checks.
+- **body** (String) Body of the Compliance Check defining what actions will be run.
+- **description** (String) Description for the Compliance Check.
+- **frequency_minutes** (Number) How often the check will be run, based on the specified frequency type below.
+- **frequency_type_id** (Number) The duration type of the frequency_minutes field.
+
+    1 - seconds
+
+    2 - minutes
+
+    3 - hours
+
+    4 - days
+
+    5 - weeks
+
+    6 - months
+
+    7 - years
+
 - **id** (String) The ID of this resource.
-- **is_all_regions** (Boolean)
-- **is_auto_archived** (Boolean)
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
-- **regions** (List of String)
-- **severity_type_id** (Number)
+- **is_all_regions** (Boolean) Determines if the check should be applied to all regions enabled in the application.
+- **is_auto_archived** (Boolean) Whether existing findings should be archived before new findings are reported.
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the Compliance Check. Is required if no owner user IDs are listed.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the Compliance Check. Is required if no owner group IDs are listed.
+- **regions** (List of String) List of the AWS regions where the compliance check applies.
+- **severity_type_id** (Number) The severity level of the compliance check.
+
+    1 - Informational.
+
+    2 - Low.
+
+    3 - Medium (Default).
+
+    4 - High.
 
 ### Read-only
 
-- **created_at** (String)
-- **ct_managed** (Boolean)
-- **last_scan_id** (Number)
+- **created_at** (String) Date when the Compliance Check was added to the application.
+- **ct_managed** (Boolean) Whether or not this compliance check is managed by cloudtamer.io.
+- **last_scan_id** (Number) ID of the latest scan.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`

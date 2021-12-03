@@ -17,22 +17,21 @@ description: |-
 
 ### Required
 
-- **idms_id** (Number)
-- **name** (String)
+- **idms_id** (Number) ID of the IDMS where the user group is located.
+- **name** (String) Name of the user group.
 
 ### Optional
 
-- **description** (String)
+- **description** (String) Description for the user group.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_groups** (Block List) (see [below for nested schema](#nestedblock--owner_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
-- **users** (Block List) (see [below for nested schema](#nestedblock--users))
+- **owner_groups** (Block List) (see [below for nested schema](#nestedblock--owner_groups)) List of group IDs that own the user group.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs that own the user group.
+- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users in the user group.
 
 ### Read-only
 
-- **created_at** (String)
-- **enabled** (Boolean)
+- **created_at** (String) Date when the user was created.
+- **enabled** (Boolean) Enabled state of the group.
 
 <a id="nestedblock--owner_groups"></a>
 ### Nested Schema for `owner_groups`

@@ -17,26 +17,25 @@ description: |-
 
 ### Required
 
-- **aws_iam_role_name** (String)
-- **name** (String)
-- **project_id** (Number)
+- **aws_iam_role_name** (String) AWS IAM role name corresponding to the Cloud Access Role.
+- **name** (String) Name of the Cloud Access Role in the application.
+- **project_id** (Number) ID of the project where the Cloud Access Role is attached.
 
 ### Optional
 
-- **accounts** (Block List) This field will be ignored if 'apply_to_all_accounts' is set to: true. (see [below for nested schema](#nestedblock--accounts))
-- **apply_to_all_accounts** (Boolean)
-- **aws_iam_path** (String)
-- **aws_iam_permissions_boundary** (Number)
-- **aws_iam_policies** (Block List) (see [below for nested schema](#nestedblock--aws_iam_policies))
-- **azure_role_definitions** (Block List) (see [below for nested schema](#nestedblock--azure_role_definitions))
-- **future_accounts** (Boolean)
+- **accounts** (Block List) (see [below for nested schema](#nestedblock--accounts)) IDs of accounts on a project that will be accessible via this Cloud Access Role.
+- **apply_to_all_accounts** (Boolean) If true, this Cloud Access Role will be applied to all accounts under the project.
+- **aws_iam_path** (String) AWS IAM Path for the Cloud Access Role (defaults to "/").
+- **aws_iam_permissions_boundary** (Number) ID of the AWS IAM policy to be used as a permissions boundary for this role.
+- **aws_iam_policies** (Block List) (see [below for nested schema](#nestedblock--aws_iam_policies)) IDs of the AWS IAM policies attached to this role.
+- **azure_role_definitions** (Block List) (see [below for nested schema](#nestedblock--azure_role_definitions)) IDs of the Azure Role Definitions attached to this role.
+- **future_accounts** (Boolean) If true, this Cloud Access Role will be added to any account that is added to this project.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **long_term_access_keys** (Boolean)
-- **short_term_access_keys** (Boolean)
-- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups))
-- **users** (Block List) (see [below for nested schema](#nestedblock--users))
-- **web_access** (Boolean)
+- **long_term_access_keys** (Boolean) If long term key access is true, users of this Cloud Access Role can generate long-term AWS access keys (as defined in the application).
+- **short_term_access_keys** (Boolean) If short term key access is true, users of this Cloud Access Role can generate short-term AWS access keys (as defined in the application).
+- **user_groups** (Block List) (see [below for nested schema](#nestedblock--user_groups)) IDs of the user groups allowed to use this role.
+- **users** (Block List) (see [below for nested schema](#nestedblock--users)) IDs of the users allowed to use this role.
+- **web_access** (Boolean) If web access is true, users of this Cloud Access Role can log into the AWS web console. Will default to false if not set.
 
 <a id="nestedblock--accounts"></a>
 ### Nested Schema for `accounts`

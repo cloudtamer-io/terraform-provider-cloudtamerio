@@ -17,23 +17,22 @@ description: |-
 
 ### Required
 
-- **name** (String)
-- **policy** (String)
+- **name** (String) Name of the IAM policy.
+- **policy** (String) Policy body for the IAM policy.
 
 ### Optional
 
-- **aws_iam_path** (String)
-- **description** (String)
+- **aws_iam_path** (String) Path for the IAM policy (defaults to "/").
+- **description** (String) Description for the IAM policy.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the IAM policy. Is required if no owner user IDs are listed.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the iam policy. Is required if no owner group IDs are listed.
 
 ### Read-only
 
-- **aws_managed_policy** (Boolean)
-- **path_suffix** (String)
-- **system_managed_policy** (Boolean)
+- **aws_managed_policy** (Boolean) True if the policy is created and managed by AWS.
+- **path_suffix** (String) Name of the IAM policy in AWS, as referenced in its ARN.
+- **system_managed_policy** (Boolean) True if the policy comes packaged with cloudtamer.io.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`

@@ -17,21 +17,22 @@ description: |-
 
 ### Required
 
-- **name** (String)
-- **policy** (String)
-- **regions** (List of String)
+- **name** (String) Name of the Cloudformation template.
+- **policy** (String) Body of the CloudFormation template in JSON or YAML.
+- **regions** (List of String) List of the AWS regions where the CloudFormation template will be deployed.
 
 ### Optional
 
-- **description** (String)
+- **description** (String) Description of the CloudFormation template.
 - **id** (String) The ID of this resource.
-- **last_updated** (String)
-- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups))
-- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users))
-- **region** (String)
-- **sns_arns** (String)
-- **template_parameters** (String)
-- **termination_protection** (Boolean)
+- **owner_user_groups** (Block List) (see [below for nested schema](#nestedblock--owner_user_groups)) List of user group IDs who will own the CloudFormation template. Is required if no user IDs are listed.
+- **owner_users** (Block List) (see [below for nested schema](#nestedblock--owner_users)) List of user IDs who will own the CloudFormation template. Is required if no group IDs are listed.
+- **region** (String) DEPRECATED! USE THE regions FIELD.
+
+	AWS region where the CloudFormation template applies.
+- **sns_arns** (String) List of comma separated AWS SNS ARNs that will trigger once the CFT is done applying.
+- **template_parameters** (String) List of CloudFormation parameters in a JSON array.
+- **termination_protection** (Boolean) Sets the termination protection status for this CFT.
 
 <a id="nestedblock--owner_user_groups"></a>
 ### Nested Schema for `owner_user_groups`
