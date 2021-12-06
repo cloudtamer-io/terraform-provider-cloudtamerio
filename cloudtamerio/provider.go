@@ -47,6 +47,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_saml_group_association":      resourceSamlGroupAssociation(),
 			"cloudtamerio_project":                     resourceProject(),
 			"cloudtamerio_gcp_iam_role":                resourceGcpIamRole(),
+			"cloudtamerio_service_control_policy":      resourceServiceControlPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"cloudtamerio_aws_cloudformation_template": dataSourceAwsCloudformationTemplate(),
@@ -60,6 +61,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_saml_group_association":      dataSourceSamlGroupAssociation(),
 			"cloudtamerio_project":                     dataSourceProject(),
 			"cloudtamerio_gcp_iam_role":                dataSourceGcpIamRole(),
+			"cloudtamerio_service_control_policy":      dataServiceControlPolicy(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
