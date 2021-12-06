@@ -28,7 +28,7 @@ terraform {
   required_providers {
     cloudtamerio = {
       source  = "cloudtamer-io/cloudtamerio"
-      version = "0.2.0"
+      version = "0.2.1"
     }
   }
 }
@@ -383,6 +383,35 @@ resource "cloudtamerio_gcp_iam_role" "gr1" {
 # Output the ID of the resource created.
 output "gcp_role" {
   value = cloudtamerio_gcp_iam_role.gr1.id
+}
+```
+
+```hcl
+# Create an AWS Service Control Policy.
+resource "cloudtamerio_service_control_policy" "scp1" {
+  name = "Test SCP"
+  description  = "This is a sample SCP."
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Action": [
+        "config:StopConfigurationRecorder"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+  owner_users { id = 1 }
+  owner_user_groups  { id = 1 }
+}
+
+# Output the ID of the resource created.
+output "scp_id" {
+  value = cloudtamerio_service_control_policy.scp1.id
 }
 ```
 
