@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.1] - 2021-10-06
+## [0.2.1] - 2021-12-06
 ### Added
 - Support creating, updating, and deleting resources for: AWS Service Control Policies.
 - Support adding and removing AWS Service Control Policies on Project and OU Cloud Rules.
