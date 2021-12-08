@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support creating, updating, and deleting resources for: AWS Service Control Policies.
 - Support adding and removing AWS Service Control Policies on Project and OU Cloud Rules.
+- Support creating, updating, and deleting resources for: Azure Role Definitions.
+- Support adding and removing Azure Role Definitions on Project and OU Cloud Rules.
 
 ## [0.2.0] - 2021-11-19
 ### Added
