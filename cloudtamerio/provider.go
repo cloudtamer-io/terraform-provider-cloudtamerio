@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_project":                     resourceProject(),
 			"cloudtamerio_gcp_iam_role":                resourceGcpIamRole(),
 			"cloudtamerio_service_control_policy":      resourceServiceControlPolicy(),
+			"cloudtamerio_azure_arm_template":          resourceAzureArmTemplate(),
 			"cloudtamerio_azure_role":                  resourceAzureRole(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -63,6 +64,7 @@ func Provider() *schema.Provider {
 			"cloudtamerio_project":                     dataSourceProject(),
 			"cloudtamerio_gcp_iam_role":                dataSourceGcpIamRole(),
 			"cloudtamerio_service_control_policy":      dataServiceControlPolicy(),
+			"cloudtamerio_azure_arm_template":          dataSourceAzureArmTemplate(),
 			"cloudtamerio_azure_role":                  dataSourceAzureRole(),
 		},
 		ConfigureContextFunc: providerConfigure,
