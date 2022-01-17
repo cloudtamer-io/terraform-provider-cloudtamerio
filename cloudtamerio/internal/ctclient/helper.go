@@ -1,6 +1,11 @@
 package ctclient
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 // FlattenStringPointer -
 func FlattenStringPointer(d *schema.ResourceData, key string) *string {
@@ -271,4 +276,51 @@ func makeMapFromArray(arr []int) map[int]bool {
 		m[v] = true
 	}
 	return m
+}
+
+// GenerateAccTestChecksForResourceOwners returns a list of acceptance test checks for the Owner User & User Group ID
+// slices of a given resource.
+func GenerateAccTestChecksForResourceOwners(
+	resourceType, resourceName string,
+	ownerUserIds, ownerUserGroupIds *[]int,
+) (funcs []resource.TestCheckFunc) {
+	if ownerUserIds != nil {
+		for idx, id := range *ownerUserIds {
+			funcs = append(funcs, resource.TestCheckResourceAttr(
+				resourceType+"."+resourceName,
+				fmt.Sprintf("owner_users.%v.id", idx),
+				fmt.Sprint(id),
+			))
+		}
+	}
+
+	if ownerUserGroupIds != nil {
+		for idx, id := range *ownerUserGroupIds {
+			funcs = append(funcs, resource.TestCheckResourceAttr(
+				resourceType+"."+resourceName,
+				fmt.Sprintf("owner_user_groups.%v.id", idx),
+				fmt.Sprint(id),
+			))
+		}
+	}
+
+	return
+}
+
+// GenerateOwnerClausesForResourceTest generates a string of owner_users & owner_user_groups clauses to be used in a
+// resource declaration for acceptance tests.
+func GenerateOwnerClausesForResourceTest(ownerUserIds, ownerUserGroupIds *[]int) (ownerClauses string) {
+	if ownerUserIds != nil {
+		for _, id := range *ownerUserIds {
+			ownerClauses += fmt.Sprintf("\nowner_users { id = %v }", id)
+		}
+	}
+
+	if ownerUserGroupIds != nil {
+		for _, id := range *ownerUserGroupIds {
+			ownerClauses += fmt.Sprintf("\nowner_user_groups { id = %v }", id)
+		}
+	}
+
+	return
 }
