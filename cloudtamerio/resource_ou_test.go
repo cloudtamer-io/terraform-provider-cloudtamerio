@@ -13,69 +13,68 @@ import (
 )
 
 const (
-	ouResourceType = "cloudtamerio_ou"
-	ouResourceName = "ou1"
+	resourceTypeOU        = "cloudtamerio_ou"
+	resourceNameOU        = "ou1"
+	dataSourceLocalNameOU = "ous"
 )
 
-// FIXME: Move these into a different file (e.g. helper.go or resource_user_test.go).
-//
-// I feel like we should be creating a User & User Group instead of assuming
-// "Admin" & "Administrators" exist since they can be deleted.
 var (
 	ownerUserIds      = []int{1}
 	ownerUserGroupIDs = []int{1}
-)
-
-func TestAccResourceOU(t *testing.T) {
-	ou := hc.OUCreate{
+	accTestOU         = hc.OUCreate{
 		Name:               "Terraform AccTest OU",
 		Description:        "sample OU for terraform acceptance test",
 		ParentOuID:         0,
 		PermissionSchemeID: 2,
-		OwnerUserIds:       &ownerUserIds,
-		OwnerUserGroupIds:  &ownerUserGroupIDs,
-	}
 
+		// I feel like we should be creating a User & User Group instead of assuming
+		// "Admin" & "Administrators" exist since they can be deleted.
+		OwnerUserIds:      &ownerUserIds,
+		OwnerUserGroupIds: &ownerUserGroupIDs,
+	}
+)
+
+func TestAccResourceOU(t *testing.T) {
 	// Create
 	create := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	// Update
-	ou.Name = "(Updated) Terraform AccTest OU"
-	ou.Description = "(Updated) sample OU for terraform acceptance test"
+	accTestOU.Name = "(Updated) Terraform AccTest OU"
+	accTestOU.Description = "(Updated) sample OU for terraform acceptance test"
 	update := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	// Remove Owner User
-	ou.OwnerUserIds = nil
+	accTestOU.OwnerUserIds = nil
 	removeOwnerUser := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	// Add Owner User
-	ou.OwnerUserIds = &ownerUserIds
+	accTestOU.OwnerUserIds = &ownerUserIds
 	addOwnerUser := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	// Remove Owner User Group
-	ou.OwnerUserGroupIds = nil
+	accTestOU.OwnerUserGroupIds = nil
 	removeOwnerUGroup := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	// Add Owner User Group
-	ou.OwnerUserGroupIds = &ownerUserGroupIDs
+	accTestOU.OwnerUserGroupIds = &ownerUserGroupIDs
 	addOwnerUGroup := resource.TestStep{
-		Config: testAccOUGenerateResourceDeclaration(&ou),
-		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&ou)...),
+		Config: testAccOUGenerateResourceDeclaration(&accTestOU),
+		Check:  resource.ComposeTestCheckFunc(testAccOUCheckResource(&accTestOU)...),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -96,15 +95,15 @@ func TestAccResourceOU(t *testing.T) {
 // testAccOUCheckResource returns a slice of functions that validate the test resource's fields
 func testAccOUCheckResource(ou *hc.OUCreate) (funcs []resource.TestCheckFunc) {
 	funcs = []resource.TestCheckFunc{
-		resource.TestCheckResourceAttr(ouResourceType+"."+ouResourceName, "name", ou.Name),
-		resource.TestCheckResourceAttr(ouResourceType+"."+ouResourceName, "description", ou.Description),
-		resource.TestCheckResourceAttr(ouResourceType+"."+ouResourceName, "parent_ou_id", fmt.Sprint(ou.ParentOuID)),
-		resource.TestCheckResourceAttr(ouResourceType+"."+ouResourceName, "permission_scheme_id", fmt.Sprint(ou.PermissionSchemeID)),
+		resource.TestCheckResourceAttr(resourceTypeOU+"."+resourceNameOU, "name", ou.Name),
+		resource.TestCheckResourceAttr(resourceTypeOU+"."+resourceNameOU, "description", ou.Description),
+		resource.TestCheckResourceAttr(resourceTypeOU+"."+resourceNameOU, "parent_ou_id", fmt.Sprint(ou.ParentOuID)),
+		resource.TestCheckResourceAttr(resourceTypeOU+"."+resourceNameOU, "permission_scheme_id", fmt.Sprint(ou.PermissionSchemeID)),
 	}
 
 	funcs = append(funcs, hc.GenerateAccTestChecksForResourceOwners(
-		ouResourceType,
-		ouResourceName,
+		resourceTypeOU,
+		resourceNameOU,
 		ou.OwnerUserIds,
 		ou.OwnerUserGroupIds,
 	)...)
@@ -127,7 +126,7 @@ func testAccOUGenerateResourceDeclaration(ou *hc.OUCreate) string {
 			permission_scheme_id = %v
 			%v
 		}`,
-		ouResourceType, ouResourceName,
+		resourceTypeOU, resourceNameOU,
 		ou.Name,
 		ou.Description,
 		ou.ParentOuID,
@@ -148,7 +147,7 @@ func testAccOUCheckResourceDestroy(s *terraform.State) error {
 
 	// loop through the resources in state, verifying each resource is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ouResourceType {
+		if rs.Type != resourceTypeOU {
 			continue
 		}
 

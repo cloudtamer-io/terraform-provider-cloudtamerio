@@ -324,3 +324,22 @@ func GenerateOwnerClausesForResourceTest(ownerUserIds, ownerUserGroupIds *[]int)
 
 	return
 }
+
+// TestAccOUGenerateDataSourceDeclarationFilter declares a data source to get an object that matches the name filter
+func TestAccOUGenerateDataSourceDeclarationFilter(dataSourceName, localName, name string) string {
+	return fmt.Sprintf(`
+		data "%v" "%v" {
+			filter {
+				name = "name"
+				values = ["%v"]
+			}
+		}`, dataSourceName, localName, name,
+	)
+}
+
+// TestAccOUGenerateDataSourceDeclarationAll declares a data source to get all items
+func TestAccOUGenerateDataSourceDeclarationAll(dataSourceName, localName string) string {
+	return fmt.Sprintf(`
+		data "%v" "%v" {}`, dataSourceName, localName,
+	)
+}
