@@ -31,12 +31,12 @@ description: |-
 
     3 - Azure Policy. These checks are scraped from Azure's policy reporting engine and apply Azure Policies to accounts.
 
-- **created_by_user_id** (Number) The user who created the Compliance Check.
 - **name** (String) Name of the Compliance Check.
 
 ### Optional
 
 - **azure_policy_id** (Number) The ID of the Azure Policy that this compliance check represents. Only present for Azure Policy compliance checks.
+- **created_by_user_id** (Number) The user who created the Compliance Check. Defaults to the requesting user if no value is provided.
 - **body** (String) Body of the Compliance Check defining what actions will be run.
 - **description** (String) Description for the Compliance Check.
 - **frequency_minutes** (Number) How often the check will be run, based on the specified frequency type below.
