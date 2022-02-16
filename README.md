@@ -197,7 +197,6 @@ output "template_id" {
 # Create an external compliance check.
 resource "cloudtamerio_compliance_check" "c1" {
   name                     = "sample-resource"
-  created_by_user_id       = 1
   cloud_provider_id        = 1
   compliance_check_type_id = 1
   owner_users { id = 1 }

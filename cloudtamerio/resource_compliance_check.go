@@ -51,9 +51,10 @@ func resourceComplianceCheck() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			// Defaults to the requesting User's ID if not specified.
 			"created_by_user_id": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
 				ForceNew: true, // Not allowed to be changed, forces new item if changed.
 			},
 			"ct_managed": {

@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file.
 - Support creating, updating, and deleting resources for: Azure Role Definitions.
 - Support adding and removing Azure Role Definitions on Project and OU Cloud Rules.
 
+### Changed
+- The 'created_by_user_id' field for Compliance Checks is now optional. This field will default to the requesting user's ID if not specified.
+
 ## [0.2.0] - 2021-11-19
 ### Added
 - Support creating, updating, and deleting resources for: user groups.
