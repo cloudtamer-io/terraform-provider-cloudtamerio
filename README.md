@@ -1,5 +1,9 @@
 # terraform-provider-cloudtamerio <!-- omit in toc -->
 
+**Note: This repository is no longer supported due to our rebrand. You must switch over to the Kion provider instead if you wish to receive updates: [terraform-provider-kion](https://github.com/kionsoftware/terraform-provider-kion). We are going to provide a migration guide shortly so stay tuned.**
+
+---
+
 The Terraform provider for cloudtamer.io allows you interact with the cloudtamer.io API using the Terraform HCL language. Our provider supports creating, updating, reading, and deleting resources. You can also use it to query for resources using filters even if a resource is not created through Terraform.
 
 - [Getting Started](#getting-started)
