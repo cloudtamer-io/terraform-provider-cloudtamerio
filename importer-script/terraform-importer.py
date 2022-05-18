@@ -65,6 +65,9 @@ if not ARGS.ct_api_key:
     else:
         sys.exit("Did not find a cloudtamer API key supplied via CLI argument or environment variable (CLOUDTAMERIO_APIKEY or CT_API_KEY).")
 
+if not ARGS.clone_prefix:
+    ARGS.clone_prefix = ""
+
 # validate flags related to cloning
 if ARGS.clone_system_managed:
 
